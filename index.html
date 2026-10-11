@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<title>桃花源記・漁人奇遇｜3D 中文教育 RPG（iPad 版）</title>
+<style>
+:root{--ink:#2b1d0e;--paper:#f3e6c8;--wood:#6b4423;--gold:#f5c542;--ok:#4caf50;--bad:#d9534f;--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px);--sal:env(safe-area-inset-left,0px);--sar:env(safe-area-inset-right,0px)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
+html,body{width:100%;height:100%;overflow:hidden;position:fixed;background:#000;font-family:"Noto Sans TC","Microsoft JhengHei","PingFang TC","Heiti TC",sans-serif;color:var(--paper);user-select:none;-webkit-user-select:none;touch-action:none}
+#c{position:absolute;top:0;left:0;width:100%;height:100%;display:block;image-rendering:pixelated;image-rendering:crisp-edges;touch-action:none;cursor:grab}
+#c:active{cursor:grabbing}
+.pixel{border:4px solid var(--ink);box-shadow:0 0 0 4px var(--paper),0 0 0 8px var(--ink),8px 8px 0 8px rgba(0,0,0,.45);background:linear-gradient(#3b2a16,#241809)}
+.btn{display:inline-block;cursor:pointer;font-family:inherit;font-size:20px;font-weight:700;color:var(--ink);background:var(--gold);border:3px solid var(--ink);padding:14px 30px;box-shadow:4px 4px 0 var(--ink);margin-top:14px;touch-action:manipulation;min-height:48px}
+.btn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--ink)}
+#hud{position:absolute;top:calc(14px + var(--sat));left:calc(14px + var(--sal));padding:10px 14px;font-size:15px;line-height:1.6;max-width:min(480px,52vw);pointer-events:none}
+#hud b{color:var(--gold);font-size:17px}
+#hudText{font-size:13px;line-height:1.75;letter-spacing:.5px;color:#d9ccae;border-left:3px solid var(--gold);padding-left:8px;margin:6px 0 8px;max-height:30vh;overflow:auto;pointer-events:auto;touch-action:pan-y}
+#hudText .cur{color:var(--gold);font-weight:700;text-shadow:0 0 8px rgba(245,197,66,.7)}
+#hudText .done{color:#f3e6c8;font-weight:700}
+#hudTextTitle{font-size:12px;color:var(--gold);opacity:.85;margin-top:4px;letter-spacing:2px}
+#stats{position:absolute;top:calc(14px + var(--sat));right:calc(14px + var(--sar));padding:8px 12px;font-size:14px;text-align:right;line-height:1.6;z-index:5}
+#stats .tools{margin-top:6px;pointer-events:auto;display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
+.tool{display:inline-flex;align-items:center;justify-content:center;cursor:pointer;background:var(--paper);color:var(--ink);border:2px solid var(--ink);padding:0 10px;height:36px;font-size:14px;font-weight:700;box-shadow:2px 2px 0 var(--ink);touch-action:manipulation}
+.tool:active{transform:translate(1px,1px);box-shadow:1px 1px 0 var(--ink)}
+#mmWrap{position:absolute;top:calc(118px + var(--sat));right:calc(14px + var(--sar));padding:6px;z-index:5;cursor:pointer}
+#mm{display:block;width:180px;height:180px;background:#1a1208;image-rendering:pixelated}
+#mmWrap.big #mm{width:290px;height:290px}
+#mmHint{font-size:12px;line-height:1.5;text-align:center;margin-top:4px;color:var(--gold);width:180px;white-space:normal}
+#mmWrap.big #mmHint{width:290px;font-size:13px}
+#mmLegend{font-size:11px;opacity:.85;text-align:center;line-height:1.4;width:180px}
+#mmWrap.big #mmLegend{width:290px}
+#prompt{position:absolute;bottom:calc(150px + var(--sab));left:50%;transform:translateX(-50%);padding:12px 24px;font-size:18px;font-weight:700;color:var(--ink);background:var(--gold);border:3px solid var(--ink);box-shadow:4px 4px 0 var(--ink);display:none;cursor:pointer;touch-action:manipulation;z-index:6}
+#toast{position:absolute;top:calc(100px + var(--sat));left:50%;transform:translateX(-50%);padding:12px 20px;font-size:17px;background:rgba(43,29,14,.92);border:3px solid var(--gold);display:none;max-width:70vw;text-align:center;pointer-events:none;z-index:7}
+#dialog{position:absolute;left:50%;bottom:calc(24px + var(--sab));transform:translateX(-50%);width:min(900px,94vw);padding:18px 24px 20px;display:none;cursor:pointer;z-index:12}
+#dlgName{display:inline-block;background:var(--gold);color:var(--ink);font-weight:700;padding:3px 14px;border:2px solid var(--ink);margin-bottom:8px;font-size:16px}
+#dlgText{font-size:20px;line-height:1.75;min-height:64px}
+#dlgOpts{display:none;grid-template-columns:1fr;gap:8px;margin:10px 0 4px}
+.dopt{font-family:inherit;cursor:pointer;font-size:17px;padding:10px 14px;min-height:44px;background:var(--paper);color:var(--ink);border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink);text-align:left;touch-action:manipulation;line-height:1.4}
+.dopt:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+#dlgNext{text-align:right;font-size:13px;opacity:.8;animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.2}}
+.screen{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.55);z-index:20}
+.panel{width:min(820px,94vw);max-height:92vh;overflow:auto;padding:26px 30px;text-align:center;touch-action:pan-y;-webkit-overflow-scrolling:touch}
+.panel.big{text-align:left}
+.panel h1{font-size:46px;color:var(--gold);letter-spacing:6px;text-shadow:4px 4px 0 var(--ink)}
+.panel h2{font-size:28px;color:var(--gold);margin-bottom:12px;text-align:center}
+.panel h3{font-size:16px;color:var(--gold);margin:14px 0 4px;border-left:4px solid var(--gold);padding-left:8px}
+.panel p{font-size:16px;line-height:1.8}
+.classic{font-size:21px!important;line-height:2.1!important;background:rgba(243,230,200,.08);padding:14px 18px;border:2px dashed rgba(243,230,200,.35);letter-spacing:2px}
+.hl{color:var(--gold);font-weight:700;font-size:24px}
+#qkind{font-size:15px;color:var(--gold);letter-spacing:2px;margin-bottom:8px}
+#qtext{font-size:21px;line-height:1.7;margin-bottom:16px}
+#qopts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.opt{font-family:inherit;cursor:pointer;font-size:17px;padding:16px 12px;min-height:56px;background:var(--paper);color:var(--ink);border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink);text-align:left;touch-action:manipulation;line-height:1.4}
+.opt.ok{background:var(--ok);color:#fff}
+.opt.bad{background:var(--bad);color:#fff;animation:shake .3s}
+.opt:disabled{cursor:default}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+#qfeed{margin-top:14px;font-size:17px;line-height:1.6;min-height:24px}
+#subtitle{position:absolute;bottom:calc(60px + var(--sab));left:50%;transform:translateX(-50%);font-size:24px;letter-spacing:3px;line-height:1.8;padding:12px 28px;background:rgba(0,0,0,.6);border-top:3px solid var(--gold);border-bottom:3px solid var(--gold);display:none;text-align:center;max-width:90vw;cursor:pointer;z-index:12}
+#subtitle small{display:block;font-size:12px;opacity:.7;letter-spacing:0}
+.label{position:absolute;transform:translate(-50%,-100%);background:rgba(43,29,14,.85);color:var(--gold);border:2px solid var(--gold);font-size:13px;padding:2px 8px;white-space:nowrap;pointer-events:none}
+.label.sign{color:#f3e6c8;border-color:#d9b77a;background:rgba(107,68,35,.92);font-size:14px}
+.label.spot{color:#fff;border-color:#ff6b6b;background:rgba(120,30,30,.9);font-size:14px}
+#textPanel{position:absolute;top:calc(70px + var(--sat));left:50%;transform:translateX(-50%);width:min(560px,90vw);max-height:70vh;overflow:auto;padding:16px;display:none;z-index:15;touch-action:pan-y}
+#textPanel p{font-size:16px;line-height:1.9;letter-spacing:1px;text-indent:2em;margin-bottom:8px}
+#textPanel .cur{color:var(--gold)}
+#passage{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0);z-index:14;opacity:0;transition:opacity 1.1s ease,background 1.1s ease;pointer-events:none}
+#passage.show{opacity:1;background:rgba(0,0,0,.4)}
+#passageBox{pointer-events:auto;cursor:pointer;width:min(820px,88vw);padding:28px 36px 20px;text-align:center;background:rgba(43,29,14,.92);border:3px solid var(--gold);box-shadow:0 0 0 6px rgba(43,29,14,.6),0 0 60px rgba(245,197,66,.3);transform:translateY(18px) scale(.96);transition:transform 1.1s ease}
+#passage.show #passageBox{transform:none}
+#pTag{display:inline-block;font-size:13px;letter-spacing:3px;color:var(--ink);background:var(--gold);padding:2px 12px;border:2px solid var(--ink);margin-bottom:14px}
+#pOrig{font-size:28px;line-height:1.9;letter-spacing:4px;color:var(--gold);font-weight:700;text-shadow:3px 3px 0 var(--ink)}
+#pSep{width:60%;height:2px;margin:14px auto;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+#pModern{font-size:19px;line-height:1.9;color:var(--paper)}
+#pHint{font-size:12px;opacity:.6;margin-top:14px}
+#zoom{position:absolute;right:calc(16px + var(--sar));bottom:calc(30px + var(--sab));display:flex;flex-direction:column;gap:10px;z-index:5}
+body.touch #zoom{right:calc(156px + var(--sar));bottom:calc(44px + var(--sab));flex-direction:row}
+.zb{width:52px;height:52px;display:flex;align-items:center;justify-content:center;background:rgba(245,197,66,.9);border:3px solid var(--ink);color:var(--ink);font-weight:700;font-size:20px;box-shadow:3px 3px 0 rgba(0,0,0,.4);cursor:pointer;touch-action:none}
+.zb:active{transform:translate(1px,1px);box-shadow:1px 1px 0 rgba(0,0,0,.4)}
+#lockBadge{position:absolute;left:50%;transform:translateX(-50%);top:calc(14px + var(--sat));padding:6px 14px;font-size:14px;color:var(--ink);background:rgba(245,197,66,.92);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);display:none;z-index:6;pointer-events:none;letter-spacing:1px}
+#touch{position:absolute;inset:0;display:none;pointer-events:none;z-index:10}
+#joy{position:absolute;left:calc(34px + var(--sal));bottom:calc(34px + var(--sab));width:150px;height:150px;border-radius:50%;background:rgba(43,29,14,.45);border:3px solid rgba(245,197,66,.8);pointer-events:auto;touch-action:none}
+#joyKnob{position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;background:rgba(245,197,66,.9);border:3px solid var(--ink);box-shadow:3px 3px 0 rgba(0,0,0,.4);pointer-events:none}
+#tAct{position:absolute;right:calc(40px + var(--sar));bottom:calc(44px + var(--sab));width:96px;height:96px;border-radius:50%;background:rgba(245,197,66,.85);border:4px solid var(--ink);color:var(--ink);font-weight:700;font-size:30px;display:flex;align-items:center;justify-content:center;pointer-events:auto;touch-action:none;box-shadow:4px 4px 0 rgba(0,0,0,.4)}
+#tAct:active{transform:scale(.94)}
+#camHint{position:absolute;right:calc(160px + var(--sar));bottom:calc(112px + var(--sab));font-size:12px;opacity:.7;text-align:center;pointer-events:none;line-height:1.5}
+#rotate{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.9);z-index:50;text-align:center;font-size:22px;line-height:2}
+table.keys{margin:10px auto;border-collapse:collapse;font-size:15px}
+table.keys td{padding:6px 14px;border:1px solid rgba(243,230,200,.3)}
+table.keys td:first-child{color:var(--gold);font-weight:700}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div id="hud" class="pixel"><b id="actTitle">桃花源記・漁人奇遇</b><div id="hudTextTitle">本幕原文</div><div id="hudText"></div><div id="obj"></div></div>
+<div id="stats" class="pixel"><div id="statText">字詞 0/0　理解 0/0</div><div class="tools"><span class="tool" id="btnMusic">🎵 音樂</span><span class="tool" id="btnText">📜 原文</span><span class="tool" id="btnHelp">❔</span><span class="tool" id="btnFull">⛶</span></div></div>
+<div id="mmWrap" class="pixel"><canvas id="mm" width="200" height="200"></canvas><div id="mmHint">—</div><div id="mmLegend">🟡字詞卷　🔴我　⚪未對話村民<br>🟢目標　🔶標記處　★關鍵人物</div></div>
+<div id="lockBadge">🔒 山洞狹窄・本幕鏡頭已鎖定</div>
+<div id="textPanel" class="pixel"></div>
+<div id="prompt"></div>
+<div id="toast"></div>
+<div id="subtitle"></div>
+<div id="labels"></div>
+
+<div id="passage"><div id="passageBox"><div id="pTag">課 文 原 文</div><div id="pOrig"></div><div id="pSep"></div><div id="pModern"></div><div id="pHint">（可拖曳畫面觀察四周・點擊此處提早繼續）</div></div></div>
+
+<div id="dialog" class="pixel"><div id="dlgName"></div><div id="dlgText"></div><div id="dlgOpts"></div><div id="dlgNext">▼ 點擊 / 按 E 繼續</div></div>
+
+<div id="modal" class="screen"><div class="panel pixel"><div id="qkind"></div><div id="qtext"></div><div id="qopts"></div><div id="qfeed"></div><button class="btn" id="qnext">繼續 ▶</button></div></div>
+<div id="overlay" class="screen"></div>
+
+<div id="zoom"><div class="zb" id="zIn">🔍+</div><div class="zb" id="zOut">🔍−</div><div class="zb" id="zReset" title="重置鏡頭">⟲</div></div>
+
+<div id="touch">
+  <div id="joy"><div id="joyKnob"></div></div>
+  <div id="camHint">單指拖曳：360° 轉動鏡頭<br>雙指開合：拉近推遠</div>
+  <div id="tAct">E</div>
+</div>
+<div id="rotate">📱 ➜ 🔄<br>請把 iPad 轉為<b style="color:#f5c542">橫向</b>遊玩</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* =========================================================
+   桃花源記・漁人奇遇  ——  3D 像素風中文教育 RPG（iPad 優化）
+   ========================================================= */
+if(typeof THREE==='undefined'){document.body.innerHTML='<p style="padding:40px;color:#fff">無法載入 Three.js，請確認網絡連線後重新整理。</p>';throw new Error('THREE missing');}
+const isTouch=('ontouchstart' in window)||navigator.maxTouchPoints>0;
+
+// ---------------------- 課文與教學資料 ----------------------
+const FULLTEXT=[
+'晉太元中，武陵人，捕魚為業。緣溪行，忘路之遠近。忽逢桃花林，夾岸數百步，中無雜樹，芳草鮮美，落英繽紛，漁人甚異之。復前行，欲窮其林。林盡水源，便得一山，山有小口，髣髴若有光。便舍船，從口入。初極狹，才通人。復行數十步，豁然開朗。土地平曠，屋舍儼然，有良田、美池、桑、竹之屬，阡陌交通，雞犬相聞。其中往來種作，男女衣着，悉如外人。黃髮、垂髫，並怡然自樂。',
+'見漁人，乃大驚，問所從來。具答之。便要還家，設酒、殺雞，作食。村中聞有此人，咸來問訊。自云：先世避秦時亂，率妻子邑人來此絕境，不復出焉；遂與外人間隔。問今是何世，乃不知有漢，無論魏、晉。此人一一為具言所聞，皆歎惋。餘人各復延至其家，皆出酒食。停數日，辭去。此中人語云：「不足為外人道也。」',
+'既出，得其船，便扶向路，處處誌之。及郡下，詣太守，說如此。太守即遣人隨其往，尋向所誌，遂迷，不復得路。',
+'南陽劉子驥，高尚士也，聞之，欣然規往，未果，尋病終，後遂無問津者。'];
+const ACTS={
+1:{title:'第一幕　發現桃花林',
+ text:'晉太元中，武陵人，捕魚為業。緣溪行，忘路之遠近。忽逢桃花林，夾岸數百步，中無雜樹，芳草鮮美，落英繽紛，漁人甚異之。復前行，欲窮其林。林盡水源，便得一山，山有小口，髣髴若有光。便舍船，從口入。',
+ vocab:[
+ {s:'捕魚為業',w:'業',o:['職業、生計','產業、財產','學業','已經'],a:0,e:'「業」指職業、賴以為生的工作，漁人以捕魚維生。'},
+ {s:'緣溪行',w:'緣',o:['沿着','緣分','因為','邊緣'],a:0,e:'「緣」作動詞，解作沿着。漁人沿着溪水前行。'},
+ {s:'忽逢桃花林',w:'逢',o:['遇到、遇見','迎接','每逢','奉承'],a:0,e:'「逢」即遇到，漁人忽然遇見一片桃花林。'},
+ {s:'夾岸數百步',w:'夾岸',o:['溪水的兩岸','夾着岸邊的山','狹窄的河岸','只有一邊的岸上'],a:0,e:'「夾岸」指溪流兩岸，桃花林長在溪水兩旁達數百步。'},
+ {s:'落英繽紛',w:'英',o:['花','英雄','精華','樹葉'],a:0,e:'「英」指花，「落英」就是落下的花瓣。'},
+ {s:'漁人甚異之',w:'異',o:['對……感到詫異','不同','奇怪的東西','分別'],a:0,e:'「異」在此是意動用法，指對桃花林感到非常詫異。'},
+ {s:'復前行',w:'復',o:['又、再','回復','報復','重複多次'],a:0,e:'「復」即又、再，漁人再向前行。'},
+ {s:'欲窮其林',w:'窮',o:['走到盡頭','貧窮','窮困','窮盡心力'],a:0,e:'「窮」作動詞，指走到盡頭，漁人想走完桃花林。'},
+ {s:'髣髴若有光',w:'髣髴',o:['隱隱約約、好像','清清楚楚','一定','忽然'],a:0,e:'「髣髴」即隱隱約約、好像的樣子，山口隱約似有光。'},
+ {s:'便舍船，從口入',w:'舍',o:['捨棄、離開','房舍','施捨','停留'],a:0,e:'「舍」通「捨」，解作捨棄、離開，漁人離船上岸。'}],
+ comp:[
+ {q:'漁人如何發現桃花林？',o:['沿着溪水前行，忘了路程遠近，忽然遇上桃花林','聽從村人指引前往','在山洞中迷路時發現','追捕一條大魚游進林中'],a:0,e:'課文：「緣溪行，忘路之遠近。忽逢桃花林。」'},
+ {q:'桃花林有何特點？',o:['兩岸數百步內只有桃樹，沒有其他樹木，花草鮮美，落花繁多','林中混雜很多不同的樹木','桃花林長在高山頂上','桃花林早已枯萎凋零'],a:0,e:'課文：「夾岸數百步，中無雜樹，芳草鮮美，落英繽紛。」'},
+ {q:'為何漁人會捨棄小船？',o:['溪水到了盡頭，前面是山，山有小口似有光，他想進去探看','因為小船破損漏水','因為被村人邀請上岸','因為天色已晚要休息'],a:0,e:'課文：「林盡水源，便得一山，山有小口，髣髴若有光。便舍船，從口入。」'}]},
+2:{title:'第二幕　山洞探險',
+ text:'初極狹，才通人。復行數十步，豁然開朗。',
+ vocab:[
+ {s:'才通人',w:'才',o:['僅僅、只','才能','剛才','人才'],a:0,e:'「才」即僅僅、只，洞口狹窄到只能通過一個人。'},
+ {s:'豁然開朗',w:'豁',o:['開闊','豁達','免除','缺口'],a:0,e:'「豁」指開闊的樣子。'},
+ {s:'豁然開朗',w:'開朗',o:['開闊明亮','性格樂觀','天氣晴朗','打開門窗'],a:0,e:'「開朗」在此指地方開闊明亮，與現代形容性格的用法不同。'}],
+ comp:[
+ {q:'山洞有何特點？',o:['起初非常狹窄，只能容一人通過，走了數十步後豁然開闊明亮','由頭到尾都十分寬闊','洞內漆黑而且沒有出口','洞內有很多村民居住'],a:0,e:'課文：「初極狹，才通人。復行數十步，豁然開朗。」'}]},
+3:{title:'第三幕　初入桃花源',
+ text:'土地平曠，屋舍儼然，有良田、美池、桑、竹之屬，阡陌交通，雞犬相聞。其中往來種作，男女衣着，悉如外人。黃髮、垂髫，並怡然自樂。',
+ vocab:[
+ {s:'土地平曠',w:'曠',o:['寬闊、空闊','荒蕪','曠課','遙遠'],a:0,e:'「曠」指寬闊，土地平坦而寬闊。'},
+ {s:'屋舍儼然',w:'儼然',o:['整齊的樣子','莊嚴的樣子','好像','高大的樣子'],a:0,e:'「儼然」形容房屋排列整齊的樣子。'},
+ {s:'有良田、美池、桑、竹之屬',w:'屬',o:['類','屬於','家屬','下屬'],a:0,e:'「屬」即類，指良田、美池、桑、竹這一類東西。'},
+ {s:'阡陌交通',w:'阡陌',o:['田間小路','城中街道','陌生人','田地'],a:0,e:'「阡陌」是田間的小路：南北方向的叫「阡」，東西方向的叫「陌」。「交通」指交錯相通。你腳下正是阡與陌的交匯處——縱橫交錯，四通八達，這就是「阡陌交通」。'},
+ {s:'男女衣着，悉如外人',w:'悉',o:['全、都','知道','熟悉','細小'],a:0,e:'「悉」即全、都，男女衣着都和外面的人一樣。'},
+ {s:'黃髮、垂髫',w:'黃髮',o:['老人','黃色頭髮的人','外國人','年輕人'],a:0,e:'老人頭髮由白轉黃，故以「黃髮」借代老人。'},
+ {s:'黃髮、垂髫',w:'垂髫',o:['小孩','老人','婦女','頭髮垂下的人'],a:0,e:'古時小孩頭髮下垂不束，故以「垂髫」借代小孩。'},
+ {s:'並怡然自樂',w:'怡',o:['愉快','疲倦','安靜','驕傲'],a:0,e:'「怡」即愉快，老人小孩都愉快自在。'}],
+ comp:[
+ {q:'桃花源中有何景物？',o:['平坦寬闊的土地、整齊的房屋、良田美池、桑樹竹林，田間小路交錯相通','高樓大廈和寬闊馬路','荒涼的沙漠和枯樹','只有一座破舊的小屋'],a:0,e:'課文：「土地平曠，屋舍儼然，有良田、美池、桑、竹之屬，阡陌交通。」'},
+ {q:'「阡陌交通」中，「阡」和「陌」分別指甚麼？',o:['阡是南北向的田間小路，陌是東西向的田間小路','阡是大路，陌是小路','阡是石路，陌是泥路','阡是水道，陌是陸路'],a:0,e:'南北為阡，東西為陌；「交通」指交錯相通。'},
+ {q:'桃花源中的人有何特點？',o:['男女衣着與外面的人一樣，老人小孩都愉快自在','衣着奇異，與外人完全不同','全是老人，沒有小孩','性格暴躁，不喜歡外人'],a:0,e:'課文：「男女衣着，悉如外人。黃髮、垂髫，並怡然自樂。」'}]},
+4:{title:'第四幕　停宿桃花源',
+ text:'見漁人，乃大驚，問所從來。具答之。便要還家，設酒、殺雞，作食。村中聞有此人，咸來問訊。自云：先世避秦時亂，率妻子邑人來此絕境，不復出焉；遂與外人間隔。問今是何世，乃不知有漢，無論魏、晉。此人一一為具言所聞，皆歎惋。餘人各復延至其家，皆出酒食。停數日，辭去。此中人語云：「不足為外人道也。」',
+ vocab:[
+ {s:'見漁人，乃大驚',w:'乃',o:['就、於是','你的','才','是'],a:0,e:'「乃」在此解作就、於是，村人見到漁人就大為驚訝。'},
+ {s:'具答之',w:'具',o:['詳細','準備','工具','全部'],a:0,e:'「具」即詳細，漁人詳細地回答他們。'},
+ {s:'便要還家',w:'要',o:['邀請（通「邀」）','需要','重要','要求'],a:0,e:'「要」通「邀」，解作邀請，村人邀請漁人回家。'},
+ {s:'村中聞有此人，咸來問訊',w:'咸',o:['都、全','鹹味','感動','少數'],a:0,e:'「咸」即都、全，村中的人全都來打聽消息。'},
+ {s:'率妻子邑人來此絕境',w:'率',o:['帶領','比率','草率','效率'],a:0,e:'「率」即帶領，先祖帶領妻兒和同鄉來到這裏。'},
+ {s:'此人一一為具言所聞',w:'具',o:['詳細','具備','器具','全部'],a:0,e:'「具言」即詳細地說，漁人把所知道的一一詳細告訴他們。'},
+ {s:'皆歎惋',w:'皆',o:['都','階級','一起','有些'],a:0,e:'「皆」即都，村人都感歎惋惜。'},
+ {s:'餘人各復延至其家',w:'延',o:['邀請','延遲','延長','拖延'],a:0,e:'「延」即邀請，其餘村人又各自邀請漁人到家中作客。'}],
+ comp:[
+ {q:'桃花源中的人發現漁人後做了些甚麼？',o:['大為驚訝，問他從哪裏來，然後邀請他回家，設酒殺雞作食款待','立即把他趕出桃花源','完全不理會他','向他打聽外面的物價'],a:0,e:'課文：「見漁人，乃大驚，問所從來。具答之。便要還家，設酒、殺雞，作食。」'},
+ {q:'桃花源中的人為何會在桃花源定居？',o:['祖先為逃避秦時戰亂，帶領妻兒鄉人來到這與世隔絕的地方，便不再出去','因為這裏有金礦','因為被皇帝流放到這裏','因為想在這裏修仙成道'],a:0,e:'課文：「先世避秦時亂，率妻子邑人來此絕境，不復出焉。」'},
+ {q:'桃花源中的人對外界有何了解？',o:['完全不了解，不知道有漢朝，更不用說魏、晉','非常清楚，經常外出','只知道漢朝，不知道魏、晉','知道晉朝皇帝是誰'],a:0,e:'課文：「問今是何世，乃不知有漢，無論魏、晉。」'},
+ {q:'桃花源中的人在漁人離開時叮囑他甚麼事？',o:['「不足為外人道也」——這裏的事不值得向外面的人說起','請他多帶朋友來作客','請他帶禮物回來','請他替他們送信給親人'],a:0,e:'課文：「此中人語云：『不足為外人道也。』」'}]},
+5:{title:'第五幕　離開桃花源',
+ text:'既出，得其船，便扶向路，處處誌之。',
+ vocab:[
+ {s:'既出，得其船',w:'既',o:['已經','既然','即將','一起'],a:0,e:'「既」即已經，漁人出來以後找到了他的船。'},
+ {s:'便扶向路',w:'扶',o:['沿着','扶持','扶起','幫助'],a:0,e:'「扶」在此解作沿着，沿着先前的路回去。'},
+ {s:'便扶向路',w:'向',o:['先前的、舊的','方向','向着','將來'],a:0,e:'「向」即先前的、舊的，「向路」是來時的路。'},
+ {s:'處處誌之',w:'誌',o:['做標記','志向','雜誌','記住'],a:0,e:'「誌」作動詞，解作做標記。'}],
+ comp:[
+ {q:'離開桃花源時，漁人做了些甚麼？',o:['找到他的船，沿着先前的路回去，處處做標記','把船留下，改走陸路回去','帶走桃花源的村民','甚麼也沒做，直接回家'],a:0,e:'課文：「既出，得其船，便扶向路，處處誌之。」'}]},
+6:{title:'第六幕　重尋桃花源',
+ text:'及郡下，詣太守，說如此。太守即遣人隨其往，尋向所誌，遂迷，不復得路。\n南陽劉子驥，高尚士也，聞之，欣然規往，未果，尋病終，後遂無問津者。',
+ vocab:[
+ {s:'及郡下',w:'及',o:['到了','以及','來得及','趕上'],a:0,e:'「及」即到了，漁人到了郡城。'},
+ {s:'詣太守',w:'詣',o:['拜訪、到……去','旨意','說話','通知'],a:0,e:'「詣」即拜訪、到……去，漁人去拜見太守。'},
+ {s:'太守即遣人隨其往',w:'遣',o:['派遣','遣散','消遣','遺留'],a:0,e:'「遣」即派遣，太守派人跟隨漁人前往。'},
+ {s:'尋向所誌',w:'誌',o:['標記','志氣','記錄','雜誌'],a:0,e:'「所誌」即先前所做的標記。'},
+ {s:'欣然規往',w:'欣',o:['高興','欣賞','新的','羨慕'],a:0,e:'「欣然」即高興地，劉子驥高興地計劃前往。'},
+ {s:'後遂無問津者',w:'問津',o:['探訪、尋求（津：渡口）','詢問價格','過河','打聽消息的人'],a:0,e:'「津」是渡口，「問津」本指詢問渡口，引申為探訪、尋求。'}],
+ comp:[
+ {q:'回到郡城後，漁人做了些甚麼？',o:['去拜見太守，把整件事稟告他','回家繼續捕魚，不告訴任何人','寫信給劉子驥','再次獨自回桃花源定居'],a:0,e:'課文：「及郡下，詣太守，說如此。」'},
+ {q:'外人最後能否找到桃花源？',o:['不能。太守派人尋找標記卻迷了路；劉子驥計劃前往，未成行就病死了，以後再沒人探訪','能，太守的人找到了桃花源','能，劉子驥找到並住了下來','能，漁人後來自己又找到了'],a:0,e:'課文：「遂迷，不復得路。……未果，尋病終，後遂無問津者。」'}]}
+};
+const EVENTS=['漁人沿溪而行，忽然遇上桃花林','林盡水源，發現山口有光，捨船入洞','穿過狹窄山洞，豁然開朗，進入桃花源','村人設酒殺雞款待，自述先世為避秦時亂而來','停留數日後辭別，村人叮囑「不足為外人道也」','出洞找到小船，沿路處處做標記'];
+const PASSAGES={
+ a1start:{o:'晉太元中，武陵人，捕魚為業。緣溪行，忘路之遠近。',m:'東晉太元年間，有個武陵人以捕魚為生。一天，他沿着溪水划船前行，忘記了走了多遠的路。'},
+ a1forest:{o:'忽逢桃花林，夾岸數百步，中無雜樹，芳草鮮美，落英繽紛，漁人甚異之。',m:'忽然遇上一片桃花林，長在溪水兩岸數百步之內，當中沒有其他樹木；花草鮮嫰美麗，落花繁多飄散。漁人對此感到十分詫異。'},
+ a1deep:{o:'復前行，欲窮其林。',m:'他再向前划行，想要走到桃花林的盡頭。'},
+ a1end:{o:'林盡水源，便得一山，山有小口，髣髴若有光。',m:'桃花林在溪水的源頭處到了盡頭，前面出現一座山。山上有個小洞口，隱隱約約好像有光透出來。'},
+ a1cave:{o:'便舍船，從口入。',m:'漁人於是離開小船，從洞口走進去。'},
+ a2start:{o:'初極狹，才通人。',m:'起初洞內非常狹窄，僅僅能讓一個人通過。'},
+ a2open:{o:'復行數十步，豁然開朗。',m:'再走了幾十步，眼前忽然變得開闊明亮。'},
+ a3land:{o:'土地平曠，屋舍儼然，有良田、美池、桑、竹之屬，阡陌交通，雞犬相聞。',m:'這裏土地平坦寬闊，房屋排列整齊，有肥沃的田地、美麗的池塘和桑樹、竹子之類；田間小路交錯相通，雞鳴狗吠的聲音彼此都聽得到。'},
+ a3people:{o:'其中往來種作，男女衣着，悉如外人。黃髮、垂髫，並怡然自樂。',m:'人們在田間來來往往地耕種勞作，男女的衣着都和外面的人一樣；老人和小孩都安閒愉快，自得其樂。'},
+ a4home:{o:'見漁人，乃大驚，問所從來。具答之。便要還家，設酒、殺雞，作食。',m:'村人見到漁人，大為驚訝，問他從哪裏來。漁人詳細地回答了他們。村人便邀請他回家，擺酒、殺雞、做飯來款待他。'},
+ a4village:{o:'餘人各復延至其家，皆出酒食。',m:'其餘的村人又各自邀請漁人到自己家中作客，都拿出酒菜來招待他。'},
+ a4leave:{o:'停數日，辭去。此中人語云：「不足為外人道也。」',m:'漁人住了幾天後便告辭離去。這裏的人叮囑他說：「這裏的事不值得向外面的人說起啊。」'},
+ a5start:{o:'既出，得其船，便扶向路，處處誌之。',m:'漁人出來以後，找到他的船，便沿着先前來時的路回去，一路上處處做標記。'},
+ a6start:{o:'及郡下，詣太守，說如此。',m:'回到郡城後，漁人去拜見太守，把這些經歷稟告了他。'},
+ a6end:{o:'太守即遣人隨其往，尋向所誌，遂迷，不復得路。南陽劉子驥，高尚士也，聞之，欣然規往，未果，尋病終，後遂無問津者。',hl:['太守即遣人隨其往，尋向所誌，遂迷，不復得路。','南陽劉子驥，高尚士也，聞之，欣然規往，未果，尋病終，後遂無問津者。'],m:'太守立即派人跟他前去，尋找先前所做的標記，結果迷了路，再也找不到那條路。南陽的劉子驥是個品德高尚的人，聽說這件事後高興地計劃前往，卻沒有成功，不久便病死了。此後就再沒有人去探訪桃花源了。'}
+};
+
+// ---------------------- 工具 ----------------------
+let seed=1;function srand(s){seed=s>>>0}
+function rnd(){seed=(seed+0x6D2B79F5)|0;let x=seed;x=Math.imul(x^(x>>>15),x|1);x^=x+Math.imul(x^(x>>>7),x|61);return((x^(x>>>14))>>>0)/4294967296}
+const R=(a,b)=>a+rnd()*(b-a);const pick=a=>a[Math.floor(rnd()*a.length)];
+const $=id=>document.getElementById(id);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+function lerpAngle(a,b,k){let d=((b-a+Math.PI)%(Math.PI*2)+Math.PI*2)%(Math.PI*2)-Math.PI;return a+d*k}
+const V=(a)=>new THREE.Vector3(a[0],a[1],a[2]);
+
+// ---------------------- 音效與背景音樂 ----------------------
+let actx=null;
+function getCtx(){if(!actx){actx=new(window.AudioContext||window.webkitAudioContext)()}if(actx.state==='suspended')actx.resume();return actx}
+function beep(f,d,type,vol){try{const c=getCtx();const o=c.createOscillator(),g=c.createGain();o.type=type||'square';o.frequency.value=f;g.gain.value=vol||0.06;o.connect(g);g.connect(c.destination);o.start();g.gain.exponentialRampToValueAtTime(0.0001,c.currentTime+d);o.stop(c.currentTime+d)}catch(e){}}
+const sfx={pick:()=>{beep(880,.1);setTimeout(()=>beep(1320,.15),90)},ok:()=>{beep(660,.1);setTimeout(()=>beep(880,.1),100);setTimeout(()=>beep(1100,.2),200)},bad:()=>beep(160,.3,'sawtooth',.05),place:()=>beep(440,.08,'triangle',.08),chime:()=>{beep(1046,.5,'sine',.05);setTimeout(()=>beep(1568,.7,'sine',.04),180)}};
+const PENT=[261.63,293.66,329.63,392.00,440.00,523.25,587.33,659.26];
+const MELODY=[[2,2],[3,2],[4,1],[5,1],[4,2],[3,1],[2,1],[1,2],[0,4],[1,1],[2,1],[3,2],[4,2],[3,1],[2,1],[1,2],[2,2],[0,4],[4,2],[5,1],[6,1],[5,2],[4,2],[3,1],[4,1],[3,1],[2,1],[1,4],[2,1],[3,1],[4,2],[3,1],[2,1],[1,2],[0,2],[1,2],[0,2],[-1,2]];
+const music={started:false,on:true,master:null,next:0,pos:0,beats:0,timer:null,BEAT:60/84};
+function musicStart(){if(music.started)return;try{const c=getCtx();music.master=c.createGain();music.master.gain.value=0.55;
+ const dly=c.createDelay(1.0);dly.delayTime.value=0.34;const fb=c.createGain();fb.gain.value=0.3;const wet=c.createGain();wet.gain.value=0.35;const lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=1800;
+ music.master.connect(c.destination);music.master.connect(dly);dly.connect(lp);lp.connect(fb);fb.connect(dly);lp.connect(wet);wet.connect(c.destination);
+ music.next=c.currentTime+0.3;music.started=true;music.timer=setInterval(musicSchedule,150);musicSchedule()}catch(e){}}
+function pluck(freq,time,dur,vol){const c=actx;const o=c.createOscillator();o.type='triangle';o.frequency.setValueAtTime(freq*1.01,time);o.frequency.exponentialRampToValueAtTime(freq,time+0.06);
+ const o2=c.createOscillator();o2.type='sine';o2.frequency.value=freq*2;const g2=c.createGain();g2.gain.value=0.25;
+ const f=c.createBiquadFilter();f.type='lowpass';f.frequency.setValueAtTime(3200,time);f.frequency.exponentialRampToValueAtTime(900,time+Math.max(0.5,dur));
+ const g=c.createGain();g.gain.setValueAtTime(0,time);g.gain.linearRampToValueAtTime(vol,time+0.012);g.gain.exponentialRampToValueAtTime(0.0005,time+Math.max(0.7,dur*1.15));
+ o.connect(f);o2.connect(g2);g2.connect(f);f.connect(g);g.connect(music.master);o.start(time);o2.start(time);const end=time+Math.max(0.8,dur*1.2);o.stop(end);o2.stop(end)}
+function drone(freq,time,dur){const c=actx;const o=c.createOscillator();o.type='sine';o.frequency.value=freq;const g=c.createGain();g.gain.setValueAtTime(0,time);g.gain.linearRampToValueAtTime(0.09,time+0.5);g.gain.setValueAtTime(0.09,time+dur-0.8);g.gain.linearRampToValueAtTime(0,time+dur);o.connect(g);g.connect(music.master);o.start(time);o.stop(time+dur+0.05)}
+function woodblock(time){const c=actx;const o=c.createOscillator();o.type='square';o.frequency.value=900;const g=c.createGain();g.gain.setValueAtTime(0.025,time);g.gain.exponentialRampToValueAtTime(0.0005,time+0.08);const f=c.createBiquadFilter();f.type='bandpass';f.frequency.value=1200;o.connect(f);f.connect(g);g.connect(music.master);o.start(time);o.stop(time+0.1)}
+function musicSchedule(){if(!music.started||!actx)return;const c=actx;while(music.next<c.currentTime+0.8){const n=MELODY[music.pos];const dur=n[1]*music.BEAT;const tm=music.next;
+ if(music.beats%8===0)drone((music.beats/8)%2?98.0:65.41,tm,8*music.BEAT);if(music.beats%4===0)woodblock(tm);
+ if(n[0]>=0){pluck(PENT[n[0]],tm,dur,0.16);if(n[1]>=2&&Math.random()<0.5)pluck(PENT[n[0]]/2,tm+0.02,dur,0.06)}
+ music.next+=dur;music.beats+=n[1];music.pos=(music.pos+1)%MELODY.length}}
+function musicToggle(){music.on=!music.on;if(music.master)music.master.gain.value=music.on?0.55:0;$('btnMusic').textContent=music.on?'🎵 音樂':'🔇 音樂'}
+document.addEventListener('visibilitychange',()=>{if(!actx)return;if(document.hidden)actx.suspend();else actx.resume()});
+
+// ---------------------- 方塊世界 ----------------------
+class World{
+ constructor(){this.blocks=[];this.waters=[];this.H=new Map();this.T=new Map();this.S=new Set();this.waterMesh=null}
+ k(x,z){return x+','+z}
+ block(x,y,z,c,s){this.blocks.push([x,y,z,c,s||null])}
+ water(x,y,z){this.waters.push([x,y,z])}
+ set(x,z,top,type){this.H.set(this.k(x,z),top);this.T.set(this.k(x,z),type)}
+ solid(x,z){this.S.add(this.k(x,z))}
+ top(x,z){return this.H.get(this.k(x,z))}
+ type(x,z){return this.T.get(this.k(x,z))}
+ isSolid(x,z){return this.S.has(this.k(x,z))}
+ isWater(x,z){return this.type(x,z)==='w'}
+ canWalk(x,z,fromY){const t=this.top(x,z);if(t===undefined)return false;if(this.type(x,z)==='w')return false;if(this.isSolid(x,z))return false;return Math.abs(t-fromY)<=1.05}
+ build(){
+  const g=new THREE.Group();const geo=new THREE.BoxGeometry(1,1,1);
+  const m=new THREE.Matrix4(),p=new THREE.Vector3(),q=new THREE.Quaternion(),sc=new THREE.Vector3(),col=new THREE.Color();
+  if(this.blocks.length){const im=new THREE.InstancedMesh(geo,new THREE.MeshLambertMaterial({color:0xffffff}),this.blocks.length);
+   this.blocks.forEach((b,i)=>{const s=b[4]||[1,1,1];p.set(b[0]+0.5,b[1]+s[1]/2,b[2]+0.5);sc.set(s[0],s[1],s[2]);m.compose(p,q,sc);im.setMatrixAt(i,m);im.setColorAt(i,col.set(b[3]))});
+   im.castShadow=true;im.receiveShadow=true;g.add(im)}
+  if(this.waters.length){const im=new THREE.InstancedMesh(geo,new THREE.MeshLambertMaterial({color:0x4a9ae6,transparent:true,opacity:0.78}),this.waters.length);
+   sc.set(1,0.85,1);this.waters.forEach((b,i)=>{p.set(b[0]+0.5,b[1]+0.425,b[2]+0.5);m.compose(p,q,sc);im.setMatrixAt(i,m)});im.receiveShadow=true;g.add(im);this.waterMesh=im}
+  buildMinimapBase(this);return g;
+ }
+}
+
+// ---------------------- 模型建構 ----------------------
+function box(w,h,d,c){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshLambertMaterial({color:c}));m.castShadow=true;m.receiveShadow=true;return m}
+function bbox(w,h,d,c){return new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshBasicMaterial({color:c}))}
+function prop(x,y,z,w,h,d,c){const m=box(w,h,d,c);m.position.set(x,y+h/2,z);scene.add(m);return m}
+function makeHuman(o){
+ o=Object.assign({skin:'#e8b98a',shirt:'#4a6b8a',pants:'#5a4632',hair:'#2b1b0e',scale:1},o);
+ const g=new THREE.Group();
+ const legL=box(0.25,0.75,0.25,o.pants);legL.geometry.translate(0,-0.375,0);legL.position.set(-0.13,0.75,0);
+ const legR=box(0.25,0.75,0.25,o.pants);legR.geometry.translate(0,-0.375,0);legR.position.set(0.13,0.75,0);
+ const body=o.robe?box(0.56,1.1,0.32,o.shirt):box(0.5,0.75,0.25,o.shirt);body.position.y=o.robe?0.95:1.125;
+ const armL=box(0.25,0.75,0.25,o.shirt);armL.geometry.translate(0,-0.375,0);armL.position.set(-0.38,1.5,0);
+ const armR=box(0.25,0.75,0.25,o.shirt);armR.geometry.translate(0,-0.375,0);armR.position.set(0.38,1.5,0);
+ const hL=box(0.25,0.18,0.25,o.skin);hL.position.y=-0.66;armL.add(hL);const hR=box(0.25,0.18,0.25,o.skin);hR.position.y=-0.66;armR.add(hR);
+ const head=box(0.5,0.5,0.5,o.skin);head.position.y=1.75;
+ const hair=box(0.53,0.14,0.53,o.hair);hair.position.y=0.2;head.add(hair);
+ const hb=box(0.53,o.hairLong?0.6:0.3,0.1,o.hair);hb.position.set(0,o.hairLong?-0.1:0.05,-0.22);head.add(hb);
+ [-0.12,0.12].forEach(x=>{const e=bbox(0.08,0.08,0.02,'#111');e.position.set(x,0.05,0.26);head.add(e)});
+ if(o.beard){const b=box(0.3,0.26,0.08,o.beard);b.position.set(0,-0.22,0.26);head.add(b)}
+ if(o.hat==='douli'){const a=box(1.05,0.08,1.05,'#c9a85c');a.position.y=0.3;head.add(a);const b=box(0.5,0.16,0.5,'#b8943f');b.position.y=0.4;head.add(b)}
+ if(o.hat==='official'){const a=box(0.56,0.24,0.56,'#151515');a.position.y=0.36;head.add(a);const b=box(0.2,0.3,0.16,'#151515');b.position.set(0,0.55,-0.1);head.add(b)}
+ if(o.hat==='scholar'){const a=box(0.4,0.22,0.4,'#1a1a2a');a.position.y=0.35;head.add(a)}
+ if(o.helmet){const a=box(0.54,0.3,0.54,'#555c66');a.position.y=0.22;head.add(a)}
+ g.add(legL,legR,body,armL,armR,head);g.scale.setScalar(o.scale);
+ g.userData={legL,legR,armL,armR,head,ph:Math.random()*6};return g;
+}
+function animateHuman(g,moving,dt){const u=g.userData;if(!u.legL)return;const k=1-Math.pow(0.001,dt);if(moving){const s=Math.sin(t*11)*0.75;u.legL.rotation.x=s;u.legR.rotation.x=-s;u.armL.rotation.x=-s*0.8;u.armR.rotation.x=s*0.8}else{['legL','legR','armL','armR'].forEach(n=>u[n].rotation.x+=(0-u[n].rotation.x)*k);u.armL.rotation.z=Math.sin(t*2+u.ph)*0.04;u.armR.rotation.z=-Math.sin(t*2+u.ph)*0.04}}
+function makeBoat(){const g=new THREE.Group();const c='#8b5a2b',d='#6b4423';const hull=box(1.5,0.4,3.4,c);hull.position.y=0.2;g.add(hull);
+ [[-0.75,0],[0.75,0]].forEach(([x])=>{const s=box(0.15,0.45,3.4,d);s.position.set(x,0.5,0);g.add(s)});
+ [-1.7,1.7].forEach(z=>{const e=box(1.5,0.45,0.15,d);e.position.set(0,0.5,z);g.add(e);const bow=box(0.9,0.3,0.5,d);bow.position.set(0,0.65,z*1.15);g.add(bow)});
+ const deck=box(1.3,0.08,3.0,'#a67c52');deck.position.y=0.42;g.add(deck);const oar=box(0.08,0.08,2.2,d);oar.position.set(0.9,0.7,-0.3);oar.rotation.x=0.4;g.add(oar);return g}
+function makeScroll(){const g=new THREE.Group();const a=bbox(0.6,0.6,0.6,'#ffe066');const b=bbox(0.68,0.2,0.68,'#fff8e1');const c=bbox(0.15,0.33,0.15,'#c0392b');c.position.set(0,0,0.35);g.add(a,b,c);
+ const beam=new THREE.Mesh(new THREE.BoxGeometry(0.5,40,0.5),new THREE.MeshBasicMaterial({color:0xffe066,transparent:true,opacity:0.22,depthWrite:false}));beam.position.y=20;g.add(beam);return g}
+function makeMarker(){const g=new THREE.Group();const p=box(0.14,1.7,0.14,'#8b5a2b');p.position.y=0.85;const f=box(0.55,0.36,0.06,'#d9323c');f.position.set(0.32,1.4,0);g.add(p,f);return g}
+function makeChicken(){const g=new THREE.Group();const b=box(0.45,0.4,0.6,'#ffffff');b.position.y=0.45;const h=box(0.3,0.3,0.3,'#ffffff');h.position.set(0,0.75,0.35);const comb=box(0.1,0.12,0.2,'#e53935');comb.position.set(0,0.95,0.35);const beak=box(0.1,0.08,0.14,'#f5a623');beak.position.set(0,0.72,0.56);g.add(b,h,comb,beak);[-0.12,0.12].forEach(x=>{const l=box(0.06,0.3,0.06,'#f5a623');l.position.set(x,0.15,0);g.add(l)});return g}
+function makeDog(){const g=new THREE.Group();const c='#a0714f';const b=box(0.45,0.45,1.0,c);b.position.y=0.55;const h=box(0.42,0.42,0.42,c);h.position.set(0,0.85,0.62);const n=box(0.2,0.16,0.14,'#3b2a1a');n.position.set(0,0.75,0.88);const tail=box(0.1,0.1,0.4,c);tail.position.set(0,0.75,-0.65);tail.rotation.x=-0.6;g.add(b,h,n,tail);[-0.14,0.14].forEach(x=>{const e=box(0.1,0.22,0.1,'#6b4423');e.position.set(x*1.5,1.05,0.6);g.add(e)});[[-0.15,0.35],[0.15,0.35],[-0.15,-0.35],[0.15,-0.35]].forEach(([x,z])=>{const l=box(0.14,0.35,0.14,c);l.position.set(x,0.17,z);g.add(l)});g.userData.tail=tail;return g}
+
+// ---------------------- 景物元件 ----------------------
+const GRASS=['#58a03f','#5fa844','#4f9a3b','#66b24a','#5aa642'],STONE=['#7d7d7d','#8a8a8a','#6f6f6f','#969696'],SNOW=['#eef3f7','#dde7ee','#f6f9fb'],PEACH=['#ffb7c5','#ff9eb5','#ffc8d6','#ff8fab','#ffd1dc'],FLOWERS=['#ffffff','#ffd54f','#ff8a80','#ce93d8','#80deea'];
+function peachTree(w,x,z,base){w.block(x,base,z,pick(['#6b4423','#5e3b1e','#74502c']),[0.8,3,0.8]);for(let dy=0;dy<3;dy++)for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++){const r=Math.abs(dx)+Math.abs(dz)+dy;if(r<=3||(r===4&&rnd()<0.35))w.block(x+dx,base+3+dy,z+dz,pick(PEACH))}
+ for(let i=0;i<6;i++){const dx=Math.round(R(-2.4,2.4)),dz=Math.round(R(-2.4,2.4));if(w.type(x+dx,z+dz)==='g'&&!w.isSolid(x+dx,z+dz))w.block(x+dx,base,z+dz,pick(PEACH),[0.6,0.06,0.6])}w.solid(x,z)}
+function mulberry(w,x,z){w.block(x,1,z,pick(['#5a3a1a','#64401e']),[0.7,2,0.7]);const G=['#2e7d32','#388e3c','#43a047','#4caf50'];for(let dy=0;dy<2;dy++)for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++)w.block(x+dx,3+dy,z+dz,pick(G));w.block(x,5,z,pick(G));if(rnd()<0.5)w.block(x+1,2.6,z,'#6a1b4d',[0.25,0.25,0.25]);w.solid(x,z)}
+function bamboo(w,x,z){const h=5+Math.floor(R(0,3));const c=pick(['#6ab04c','#7bc96f','#58a040']);w.block(x,1,z,c,[0.32,h,0.32]);for(let y=3;y<=h;y+=2)w.block(x,y+0.3,z,'#8fd17a',[0.9,0.25,0.9]);w.solid(x,z)}
+function house(w,x0,z0,wd,dp,main){
+ const wall=pick(['#e9dcc0','#e4d6b8']),wood='#6b4423',roofs=['#3f3a4a','#4a4458','#55506a'];
+ for(let x=x0;x<x0+wd;x++)for(let z=z0;z<z0+dp;z++){w.solid(x,z);const edge=x===x0||x===x0+wd-1||z===z0||z===z0+dp-1;if(!edge)continue;const corner=(x===x0||x===x0+wd-1)&&(z===z0||z===z0+dp-1);const door=z===z0&&x===x0+Math.floor(wd/2);
+  for(let y=1;y<=3;y++){if(door&&y<=2){w.block(x,y,z,'#2a1a0a');continue}let c=wall;if(corner||y===3)c=wood;else if(y===2&&(z===z0||z===z0+dp-1)&&(x===x0+1||x===x0+wd-2))c='#7fb0c8';w.block(x,y,z,c)}}
+ for(let l=0;;l++){const xa=x0-1+l,xb=x0+wd-l,za=z0-1+l,zb=z0+dp-l;if(xa>xb||za>zb)break;for(let x=xa;x<=xb;x++)for(let z=za;z<=zb;z++)w.block(x,4+l,z,roofs[l%3])}
+ w.block(x0+Math.floor(wd/2),0.95,z0-1,'#c9b07a',[1,0.1,1]);
+ const dx=x0+Math.floor(wd/2)+0.5;if(main){[-1.6,1.6].forEach(o=>lamp(dx+o,2.6,z0-0.3,0xff8060,0.6,10,'#ff5a3c'))}
+}
+function buildRoom(W,D,floors,wallCol,wood){
+ world=new World();
+ for(let x=-1;x<=W;x++)for(let z=-1;z<=D;z++){const isWall=x===-1||x===W||z===-1||z===D;const door=z===-1&&x===Math.floor(W/2);
+  if(isWall&&!door){for(let y=0;y<=3;y++){let c=wallCol;if(y===0||y===3)c=wood;else if((x===-1||x===W)&&(z===-1||z===D))c=wood;else if(y===2&&((x+z)%4===1))c='#9fc5e8';world.block(x,y,z,c)}world.set(x,z,4,'r');world.solid(x,z)}
+  else{world.block(x,0,z,pick(floors));world.set(x,z,1,'g')}}
+ const dx=Math.floor(W/2);world.block(dx,0,-2,'#d9c27a');world.set(dx,-2,1,'s');world.block(dx,0,-3,'#d9c27a');world.set(dx,-3,1,'s');
+}
+let lamps=[];
+function lamp(x,y,z,color,intensity,dist,bulb){const l=bbox(0.35,0.45,0.35,bulb||'#ffd27a');l.position.set(x,y,z);scene.add(l);const pl=new THREE.PointLight(color||0xffb060,intensity||0.9,dist||14);pl.position.set(x,y+0.3,z);scene.add(pl);lamps.push({l:pl,base:pl.intensity,ph:Math.random()*6})}
+function updateLamps(){for(const L of lamps)L.l.intensity=L.base*(0.86+0.1*Math.sin(t*7+L.ph)+0.04*Math.sin(t*23+L.ph*3))}
+let sky=null,clouds=[],motes=[];
+function addSky(top,bot,disc){const g=new THREE.SphereGeometry(300,20,12);const pos=g.attributes.position,cols=[];const c1=new THREE.Color(top),c2=new THREE.Color(bot);
+ for(let i=0;i<pos.count;i++){const k=clamp((pos.getY(i)/300+0.12)/0.8,0,1);const c=c2.clone().lerp(c1,Math.pow(k,0.65));cols.push(c.r,c.g,c.b)}
+ g.setAttribute('color',new THREE.Float32BufferAttribute(cols,3));sky=new THREE.Mesh(g,new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.BackSide,fog:false,depthWrite:false}));sky.renderOrder=-10;
+ if(disc){const s=new THREE.Mesh(new THREE.SphereGeometry(9,10,8),new THREE.MeshBasicMaterial({color:0xfff6cf,fog:false}));s.position.set(124,217,78);sky.add(s);const h=new THREE.Mesh(new THREE.SphereGeometry(16,10,8),new THREE.MeshBasicMaterial({color:0xfff0b0,fog:false,transparent:true,opacity:0.25}));h.position.copy(s.position);sky.add(h)}
+ scene.add(sky)}
+function addClouds(n,cx,cz,spread){for(let i=0;i<n;i++){const g=new THREE.Group();const k=2+Math.floor(R(0,4));for(let j=0;j<k;j++){const m=new THREE.Mesh(new THREE.BoxGeometry(R(4,9),R(1.5,2.6),R(3,6)),new THREE.MeshLambertMaterial({color:0xffffff,transparent:true,opacity:0.9}));m.position.set(R(-5,5),R(-0.5,0.9),R(-3,3));g.add(m)}g.position.set(cx+R(-spread,spread),R(38,60),cz+R(-spread,spread));g.userData.sp=R(0.6,1.4);scene.add(g);clouds.push(g)}}
+function updateClouds(dt){for(const c of clouds){c.position.x+=c.userData.sp*dt;if(c.position.x>P.x+170)c.position.x=P.x-170}}
+function addMotes(o){const n=o.n,pos=new Float32Array(n*3),col=new Float32Array(n*3),base=new Float32Array(n*3);const c=new THREE.Color();const sz=o.spreadZ||o.spread;
+ for(let i=0;i<n;i++){const x=o.cx+R(-o.spread,o.spread),y=R(o.ymin,o.ymax),z=o.cz+R(-sz,sz);base[i*3]=pos[i*3]=x;base[i*3+1]=pos[i*3+1]=y;base[i*3+2]=pos[i*3+2]=z;c.set(pick(o.colors));col[i*3]=c.r;col[i*3+1]=c.g;col[i*3+2]=c.b}
+ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));g.setAttribute('color',new THREE.BufferAttribute(col,3));
+ const m=new THREE.Points(g,new THREE.PointsMaterial({size:o.size||0.35,vertexColors:true,transparent:true,opacity:o.opacity||0.9,depthWrite:false}));m.frustumCulled=false;scene.add(m);motes.push({m,base,o})}
+function updateMotes(dt){for(const mt of motes){const a=mt.m.geometry.attributes.position.array,b=mt.base,o=mt.o;for(let i=0;i<a.length;i+=3){if(o.kind==='rise'){a[i+1]+=dt*(o.speed||1.2);a[i]+=Math.sin(t*0.8+i)*dt*0.35;if(a[i+1]>b[i+1]+(o.h||6)){a[i+1]=b[i+1];a[i]=b[i]}}else{a[i]=b[i]+Math.sin(t*1.3+i)*1.2;a[i+1]=b[i+1]+Math.sin(t*2.1+i*0.7)*0.5;a[i+2]=b[i+2]+Math.cos(t*0.9+i)*1.2}}mt.m.geometry.attributes.position.needsUpdate=true;if(o.kind==='firefly')mt.m.material.opacity=0.55+0.45*Math.sin(t*3)}}
+function addSmoke(x,y,z){addMotes({n:16,colors:['#bdbdbd','#d6d6d6','#9e9e9e'],cx:x,cz:z,spread:0.3,ymin:y,ymax:y+0.5,kind:'rise',speed:1.1,h:7,size:0.7,opacity:0.45})}
+
+// ---------------------- 核心狀態 ----------------------
+let scene,camera,renderer,clock;let world=null,boat=null,petals=null,torch=null,sun=null;
+let npcs=[],scrolls=[],triggers=[],animals=[],markersArr=[],signs=[],markSpots=[];
+let mode='title',act=0,t=0,cut=null;
+let camYaw=Math.PI,camPitch=0.62,camDist=13,camDistDefault=13,zoomDir=0,holdCam=false;
+let camLocked=false,caveHalfW=null,lockHint=false;           // 第二幕鏡頭鎖定
+const LOCK={yaw:Math.PI,pitch:0.34,dist:5.5,maxY:4.2,minZ:-6.5};
+const CAM={minD:4,maxD:40,minP:0.12,maxP:1.5,defP:0.62};
+const BOARD_DIST=3.6;                                          // 登船判定距離
+const camLook=new THREE.Vector3();const P={x:0,y:1,z:0,facing:0,onBoat:false,moving:false};
+let player,objective='',markersPlaced=0,act4Ready=false,act4Stage='';const stats={vF:0,vT:0,cF:0,cT:0};const keys={};const joy={x:0,y:0,id:null,cx:0,cy:0};
+let toastLock=0;const mm={cv:null,ctx:null,base:null,b:null,goal:null};
+const shownPassages=new Set();let hudHL=[];let passageDismiss=null;
+
+// ---------------------- 初始化 ----------------------
+function init(){
+ renderer=new THREE.WebGLRenderer({canvas:$('c'),antialias:false,powerPreference:'high-performance'});renderer.setPixelRatio(1);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+ scene=new THREE.Scene();camera=new THREE.PerspectiveCamera(55,innerWidth/innerHeight,0.1,400);clock=new THREE.Clock();
+ player=makeHuman({hat:'douli',shirt:'#4a6b8a',pants:'#5a4632',skin:'#e0ac69'});
+ mm.cv=$('mm');mm.ctx=mm.cv.getContext('2d');
+ resize();addEventListener('resize',resize);addEventListener('orientationchange',()=>setTimeout(resize,300));
+ bindInput();showTitle();animate();
+}
+function resize(){const w=innerWidth,h=innerHeight,RES=0.65;renderer.setSize(Math.floor(w*RES),Math.floor(h*RES),false);camera.aspect=w/h;camera.updateProjectionMatrix();$('rotate').style.display=(isTouch&&h>w)?'flex':'none'}
+function setupLights(o){
+ scene.background=new THREE.Color(o.sky);scene.fog=o.fog?new THREE.Fog(o.fog[0],o.fog[1],o.fog[2]):null;
+ if(o.dome)addSky(o.dome[0],o.dome[1],o.disc!==false);
+ scene.add(new THREE.HemisphereLight(o.hemiSky||0xbfd8ff,o.hemiGround||0x5a4a2a,o.hemi===undefined?0.75:o.hemi));
+ sun=new THREE.DirectionalLight(o.sunColor||0xffefcf,o.sun===undefined?0.85:o.sun);sun.castShadow=o.sun!==0;sun.shadow.mapSize.set(2048,2048);
+ const sc=sun.shadow.camera;sc.left=-70;sc.right=70;sc.top=70;sc.bottom=-70;sc.near=1;sc.far=220;sun.shadow.bias=-0.0015;sun.shadow.normalBias=0.03;
+ scene.add(sun);scene.add(sun.target);
+}
+function clearScene(){while(scene.children.length)scene.remove(scene.children[0]);npcs.forEach(n=>n.label.remove());signs.forEach(s=>s.label.remove());markSpots.forEach(s=>s.label.remove());npcs=[];signs=[];markSpots=[];scrolls=[];triggers=[];animals=[];markersArr=[];lamps=[];clouds=[];motes=[];sky=null;petals=null;boat=null;world=null;sun=null;scene.fog=null;mm.base=null;mm.goal=null;if(torch){player.remove(torch);torch=null}player.visible=true;$('prompt').style.display='none';
+ setCamLock(false)}
+function setCamLock(on){camLocked=on;if(!on)caveHalfW=null;$('zoom').style.display=on?'none':'';$('lockBadge').style.display=on?'block':'none';if(isTouch)$('camHint').textContent=on?'🔒 本幕鏡頭固定':'';if(!isTouch||!on)$('camHint').innerHTML='單指拖曳：360° 轉動鏡頭<br>雙指開合：拉近推遠'}
+function lockNotice(){if(lockHint)return;lockHint=true;toast('🔒 山洞狹窄，本幕鏡頭已鎖定為跟隨視角，離開山洞後可再自由轉動',3000);setTimeout(()=>lockHint=false,6000)}
+function lockClamp(p){if(!caveHalfW)return;const hw=caveHalfW(Math.max(0,Math.floor(p.z)));p.x=clamp(p.x,-hw+0.45,hw+0.55);p.y=Math.min(p.y,LOCK.maxY);p.z=Math.max(p.z,LOCK.minZ)}
+function setCam(dist){camDist=dist;camDistDefault=dist;camPitch=CAM.defP}
+function placePlayer(x,z,yaw,onBoat){P.x=x;P.z=z;P.onBoat=!!onBoat;P.y=onBoat?2:(world.top(Math.floor(x),Math.floor(z))||1);P.facing=yaw===0?Math.PI:(yaw===Math.PI?0:Math.PI-yaw);camYaw=yaw;player.rotation.y=P.facing;scene.add(player);snapCamera()}
+function camGoal(){if(camLocked){camYaw=LOCK.yaw;camPitch=LOCK.pitch;camDist=LOCK.dist}
+ const tx=P.x,ty=(P.onBoat?1.05:P.y)+1.4,tz=P.z;const g={look:new THREE.Vector3(tx,ty,tz),pos:new THREE.Vector3(tx+Math.sin(camYaw)*Math.cos(camPitch)*camDist,ty+Math.sin(camPitch)*camDist,tz+Math.cos(camYaw)*Math.cos(camPitch)*camDist)};
+ if(camLocked)lockClamp(g.pos);return g}
+function snapCamera(){const g=camGoal();camera.position.copy(g.pos);camLook.copy(g.look);camera.lookAt(camLook)}
+
+// ---------------------- NPC / 物件 ----------------------
+function addNPC(o){const g=o.model;const ty=world.top(Math.floor(o.x),Math.floor(o.z));g.position.set(o.x,ty===undefined?1:ty,o.z);g.rotation.y=o.face===undefined?Math.PI:o.face;scene.add(g);
+ const label=document.createElement('div');label.className='label';label.textContent=(o.star?'★ ':'')+o.name;$('labels').appendChild(label);const n=Object.assign({},o,{g,label,talked:false});npcs.push(n);return n}
+function addSign(x,z,text){const g=new THREE.Group();const p=box(0.16,1.5,0.16,'#8b5a2b');p.position.y=0.75;const b=box(1.0,0.5,0.1,'#d9b77a');b.position.y=1.45;g.add(p,b);const ty=world.top(Math.floor(x),Math.floor(z));g.position.set(x,ty===undefined?1:ty,z);scene.add(g);const label=document.createElement('div');label.className='label sign';label.textContent=text;$('labels').appendChild(label);signs.push({g,label})}
+function addScroll(x,y,z,v){const g=makeScroll();g.position.set(x,y,z);scene.add(g);scrolls.push({g,x,y,z,v,taken:false})}
+function scrollsLeft(){return scrolls.filter(s=>!s.taken).length}
+function addTrigger(test,fn,once){triggers.push({test,fn,until:0,once:!!once})}
+function addPassageTrigger(test,id){triggers.push({test,fn:()=>showPassage(id),until:0,once:true})}
+function addAnimal(type,x,z){const g=type==='chicken'?makeChicken():makeDog();g.position.set(x,world.top(Math.floor(x),Math.floor(z))||1,z);scene.add(g);animals.push({g,type,hx:x,hz:z,tx:x,tz:z,timer:Math.random()*2,speed:type==='chicken'?1.2:2.2})}
+function placeBoat(x,z){boat=makeBoat();boat.position.set(x,0.6,z);scene.add(boat)}
+function createPetals(){const N=700,pos=new Float32Array(N*3);for(let i=0;i<N;i++){pos[i*3]=P.x+R(-44,44);pos[i*3+1]=R(2,16);pos[i*3+2]=P.z+R(-60,60)}const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(pos,3));petals=new THREE.Points(geo,new THREE.PointsMaterial({color:0xffb7c5,size:0.3,sizeAttenuation:true}));petals.frustumCulled=false;scene.add(petals)}
+// 第五幕：河岸「標記處」（老樹＋石堆＋沙台＋紅色光柱）
+function addMarkSpot(x,z){
+ const g=new THREE.Group();
+ const pad=box(1.4,0.08,1.4,'#eadc9c');pad.position.y=0.04;g.add(pad);
+ [[0.5,0.45,'#8a8a8a'],[0.38,0.36,'#9a9a9a'],[0.26,0.28,'#777777']].forEach(([s,h,c],i)=>{const m=box(s,h,s,c);m.position.set(-0.45,0.08+i*0.36+h/2,0.1);g.add(m)});
+ const tr=box(0.3,2.6,0.3,'#5a4030');tr.position.set(0.55,1.3,0.25);g.add(tr);
+ const b1=box(1.1,0.16,0.16,'#5a4030');b1.position.set(1.0,2.25,0.25);b1.rotation.z=0.5;g.add(b1);
+ const b2=box(0.9,0.16,0.16,'#5a4030');b2.position.set(0.2,2.55,0.25);b2.rotation.z=-0.6;g.add(b2);
+ const beam=new THREE.Mesh(new THREE.BoxGeometry(0.6,40,0.6),new THREE.MeshBasicMaterial({color:0xff5a5a,transparent:true,opacity:0.2,depthWrite:false}));beam.position.y=20;g.add(beam);
+ const ty=world.top(Math.floor(x),Math.floor(z));g.position.set(x,ty===undefined?2:ty,z);scene.add(g);
+ const label=document.createElement('div');label.className='label spot';label.textContent='🚩 標記處';$('labels').appendChild(label);
+ markSpots.push({x,z,g,beam,label,done:false});
+}
+function spotsLeft(){return markSpots.filter(s=>!s.done).length}
+function nearSpot(){let best=null,bd=2.6;for(const s of markSpots){if(s.done)continue;const d=Math.hypot(s.x-P.x,s.z-P.z);if(d<bd){bd=d;best=s}}return best}
+
+// ---------------------- 場景：溪流與桃花林 ----------------------
+const riverCX=z=>Math.round(12*Math.sin(z/36));
+function buildRiverScene(o){
+ srand(4321);world=new World();const cx0=riverCX(196);
+ const caveCell=(x,z)=>z>=202&&z<=210&&Math.abs(x-cx0)<=2;
+ for(let z=-20;z<=248;z++)for(let x=-62;x<=62;x++){
+  if(Math.abs(x)>48||z<-8){const m=Math.max(Math.abs(x)-48,-8-z);const h=Math.min(44,3+Math.floor(m*2.3+R(0,2.5)));const base=Math.max(0,h-4);if(h-1>base)world.block(x,base,z,pick(STONE),[1,h-1-base,1]);world.block(x,h-1,z,h<9?pick(GRASS):h<26?pick(STONE):pick(SNOW));world.set(x,z,h,'r');world.solid(x,z);continue}
+  const cx=riverCX(Math.min(z,196)),d=Math.abs(x-cx);
+  if(z<=196&&d<=5){world.block(x,-1,z,d===5?'#7a9a8a':'#4a6a7a');world.water(x,0,z);world.set(x,z,0.85,'w')}
+  else if(z>=202){
+   if(caveCell(x,z)){world.block(x,0,z,'#505050',[1,2,1]);world.set(x,z,2,'g')}
+   else if(z===211&&Math.abs(x-cx0)<=2){world.block(x,0,z,'#060608',[1,6,1]);world.set(x,z,6,'r');world.solid(x,z)}
+   else{const h=Math.min(28,3+Math.floor((z-200)*0.9+R(0,2)));const base=z<=216?0:h-3;if(h-1>base)world.block(x,base,z,pick(STONE),[1,h-1-base,1]);world.block(x,h-1,z,h<9?pick(GRASS):h<24?pick(STONE):pick(SNOW));world.set(x,z,h,'r');world.solid(x,z)}
+  }else{const sand=d<=7&&z<=199;world.block(x,0,z,sand?pick(['#d9c27a','#d4bc72','#dec984']):pick(GRASS),[1,2,1]);world.set(x,z,2,sand?'s':'g');
+   if(sand){if(d===6&&rnd()<0.3)world.block(x,2,z,pick(['#7cb342','#9ccc65','#8bc34a']),[0.18,R(1.2,1.9),0.18]);else if(d>=6&&rnd()<0.06)world.block(x,2,z,pick(STONE),[R(0.5,0.9),R(0.3,0.6),R(0.5,0.9)])}
+   else{const r=rnd();if(r<0.04)world.block(x,2,z,pick(FLOWERS),[0.3,0.3,0.3]);else if(r<0.13)world.block(x,2,z,pick(['#4f9a3b','#66b24a']),[0.35,R(0.3,0.55),0.35])}}
+ }
+ for(let z=20;z<=194;z+=4)for(let x=-46;x<=46;x+=4){const tx=x+Math.floor(R(0,4)),tz=z+Math.floor(R(0,4));if(Math.abs(tx-riverCX(tz))<10)continue;if(rnd()<0.5&&world.type(tx,tz)==='g'&&!world.isSolid(tx,tz))peachTree(world,tx,tz,2)}
+ scene.add(world.build());
+ if(o.fog){setupLights({sky:0xb9bcc0,fog:[0xb9bcc0,8,55],dome:[0x9fa4aa,0xb9bcc0],disc:false,hemi:0.55,sun:0.4})}
+ else{setupLights({sky:0xa8d8ff,fog:[0xa8d8ff,70,200],dome:[0x3f82d0,0xa8d8ff],hemiSky:0xcfe8ff,hemiGround:0x6a7a3a,hemi:0.72,sun:0.95});addClouds(14,0,110,150);
+  addMotes({n:70,colors:['#ffeb3b','#ff8a65','#ffffff','#f48fb1'],cx:0,cz:105,spread:40,spreadZ:100,ymin:2.5,ymax:5,kind:'fly',size:0.3});
+  const glow=bbox(1.2,1.6,0.3,'#fff3b0');glow.position.set(cx0+0.5,3.0,210.6);scene.add(glow);const pl=new THREE.PointLight(0xffe08a,1.8,20);pl.position.set(cx0+0.5,3.5,208);scene.add(pl)}
+ return cx0;
+}
+// ---------------------- 場景：山洞（第二幕・鏡頭鎖定） ----------------------
+function buildCave(){
+ srand(99);world=new World();const halfW=z=>z<24?0:z<48?1:z<68?3:12;caveHalfW=halfW;let lights=0;
+ for(let z=-8;z<=84;z++)for(let x=-18;x<=18;x++){const hw=halfW(Math.max(0,z));
+  if(z>=-6&&Math.abs(x)<=hw){if(z>=68){world.block(x,0,z,pick(GRASS));if(rnd()<0.12)world.block(x,1,z,pick(PEACH),[0.35,0.35,0.35]);if(rnd()<0.06)world.block(x,1,z,pick(FLOWERS),[0.3,0.3,0.3])}
+   else{world.block(x,0,z,pick(['#4a4a50','#505058','#454549']));if(rnd()<0.07)world.block(x,1,z,'#3a5a7a',[0.8,0.04,0.8]);if(rnd()<0.08)world.block(x,1,z,pick(STONE),[0.3,0.25,0.3]);
+    world.block(x,5,z,pick(['#2e2e34','#34343a']));if(rnd()<0.2){const len=R(0.3,0.8);world.block(x,5-len,z,'#3a3a40',[0.3,len,0.3])}}
+   world.set(x,z,1,'g')}
+  else{world.block(x,0,z,pick(['#3a3a40','#44444c','#303036','#4c4c54']),[1,5,1]);world.set(x,z,5,'r');world.solid(x,z);
+   if(rnd()<0.07&&z>0&&z<68&&Math.abs(x)===hw+1){const col=pick(['#7fe9ff','#9fffe0','#c8a7ff']);const c=bbox(0.3,0.5,0.3,col);c.position.set(x+0.5,1.6,z+0.5);scene.add(c);if(lights<6&&rnd()<0.5){const pl=new THREE.PointLight(col,0.8,6);pl.position.copy(c.position);scene.add(pl);lights++}}}
+ }
+ scene.add(world.build());setupLights({sky:0x05050a,fog:[0x05050a,4,28],hemi:0.12,sun:0});
+ addMotes({n:40,colors:['#7fe9ff','#b0ffe8'],cx:0,cz:36,spread:2.5,spreadZ:34,ymin:1.5,ymax:4.0,kind:'firefly',size:0.18});
+ const exitLight=new THREE.PointLight(0xffffff,2.4,40);exitLight.position.set(0.5,6,83);scene.add(exitLight);
+ const inLight=new THREE.PointLight(0x9fb8ff,0.5,9);inLight.position.set(0.5,3,-5.5);scene.add(inLight);
+ torch=new THREE.PointLight(0xffb060,1.5,12);torch.position.set(0,2,0.5);player.add(torch);lamps.push({l:torch,base:1.5,ph:1});
+}
+// ---------------------- 場景：桃花源 ----------------------
+const HOUSES=[[-24,-24,6,5],[-14,-24,6,5],[5,-24,6,5],[15,-24,6,5],[36,-24,6,5],[-24,5,6,5],[-14,5,6,5],[22,5,6,5],[-24,29,7,5],[-12,29,6,5],[6,29,6,5],[18,29,7,5]],MAIN=[6,5,9,6];
+const FIELDS=[[-54,-34,-54,-32],[34,54,-54,-32],[-54,-36,6,22],[-54,-32,30,54],[6,30,36,54]],PONDS=[[-44,-12,8],[42,-12,6]];
+function isPath(x,z){if(x>=-2&&x<=1&&z>=-56&&z<=48)return true;if(((z>=-28&&z<=-26)||(z>=0&&z<=2)||(z>=24&&z<=26))&&Math.abs(x)<=52)return true;if(((x>=-30&&x<=-28)||(x>=28&&x<=30))&&z>=-28&&z<=26)return true;return false}
+const inRect=(x,z,r)=>x>=r[0]&&x<=r[1]&&z>=r[2]&&z<=r[3];
+function fieldPath(x,z){for(const r of FIELDS){if(inRect(x,z,r)){if((x-r[0])%9===4)return 'q';if((z-r[2])%8===4)return 'm'}}return null}
+function fence(w,r){const [x0,x1,z0,z1]=r,c='#8b5a2b';
+ for(let x=x0-1;x<=x1+1;x++)[z0-1,z1+1].forEach(z=>{if(inRect(x,z0,r)&&fieldPath(x,z0)==='q')return;if((x-x0)%3===0)w.block(x,1,z,c,[0.22,1.0,0.22]);w.block(x,1.55,z,c,[1,0.1,0.1]);w.block(x,1.1,z,c,[1,0.1,0.1])});
+ for(let z=z0;z<=z1;z++)[x0-1,x1+1].forEach(x=>{if(fieldPath(x0,z)==='m')return;if((z-z0)%3===0)w.block(x,1,z,c,[0.22,1.0,0.22]);w.block(x,1.55,z,c,[0.1,0.1,1]);w.block(x,1.1,z,c,[0.1,0.1,1])})}
+function scarecrow(w,x,z){w.block(x,1,z,'#8b5a2b',[0.18,2.2,0.18]);w.block(x,2.4,z,'#8b5a2b',[1.4,0.14,0.14]);w.block(x,2.1,z,'#b5565a',[0.7,0.6,0.3]);w.block(x,2.75,z,'#e0ac69',[0.4,0.4,0.4]);w.block(x,3.1,z,'#c9a85c',[0.9,0.1,0.9]);w.solid(x,z)}
+function haystack(w,x,z){w.block(x,1,z,'#d4b24c',[1.2,0.8,1.2]);w.block(x,1.8,z,'#dcbb55',[0.8,0.6,0.8]);w.block(x,2.4,z,'#e2c45e',[0.4,0.4,0.4]);w.solid(x,z)}
+function buildVillage(){
+ srand(777);world=new World();
+ for(let x=-64;x<=64;x++)for(let z=-64;z<=64;z++){const edge=Math.max(Math.abs(x),Math.abs(z));
+  if(edge>=56){if(x>=-2&&x<=1&&z<=-56&&z>=-62){world.block(x,0,z,'#505050');world.set(x,z,1,'g')}else{const h=3+(edge-56)*2.3+Math.floor(R(0,2.5));const base=Math.max(0,h-3);if(h-1>base)world.block(x,base,z,pick(STONE),[1,h-1-base,1]);world.block(x,h-1,z,edge<59?pick(GRASS):edge<63?pick(STONE):pick(SNOW));world.set(x,z,h,'r');world.solid(x,z)}continue}
+  let pond=false,ring=false;for(const p of PONDS){const d=Math.hypot(x-p[0],z-p[1]);if(d<=p[2])pond=true;else if(d<=p[2]+1.2)ring=true}
+  if(pond){world.block(x,-1,z,'#5a7a6a');world.water(x,0,z);world.set(x,z,0.85,'w');if(rnd()<0.12)world.block(x,0.9,z,pick(['#f48fb1','#66bb6a','#43a047']),[0.5,0.12,0.5]);continue}
+  if(ring){world.block(x,0,z,'#d9c27a');world.set(x,z,1,'s');if(rnd()<0.25)world.block(x,1,z,pick(['#7cb342','#9ccc65']),[0.18,R(1.0,1.6),0.18]);continue}
+  if(FIELDS.some(r=>inRect(x,z,r))){const fp=fieldPath(x,z);if(fp){world.block(x,0,z,pick(['#cdb078','#c8ab72']));world.set(x,z,1,'s')}else{world.block(x,0,z,pick(['#6e4a2a','#74502e','#684525']));world.set(x,z,1,'g');if(z%2===0)world.block(x,1,z,pick(['#7cb342','#8bc34a','#9ccc65','#aed581']),[0.55,R(0.5,0.9),0.55])}continue}
+  if(isPath(x,z)){world.block(x,0,z,pick(['#d9c27a','#d4bc72']));world.set(x,z,1,'s');continue}
+  world.block(x,0,z,pick(GRASS));world.set(x,z,1,'g');const r=rnd();if(r<0.025)world.block(x,1,z,pick(FLOWERS),[0.3,0.3,0.3]);else if(r<0.09)world.block(x,1,z,pick(['#4f9a3b','#66b24a']),[0.35,R(0.3,0.5),0.35]);
+ }
+ setupLights({sky:0xbfe0ff,fog:[0xbfe0ff,90,220],dome:[0x3d7fd6,0xbfe0ff],hemiSky:0xcfe8ff,hemiGround:0x6a7a3a,hemi:0.7,sun:0.95});
+ HOUSES.forEach(h=>house(world,h[0],h[1],h[2],h[3],false));house(world,MAIN[0],MAIN[1],MAIN[2],MAIN[3],true);
+ FIELDS.forEach(r=>{fence(world,r);let cx=Math.round((r[0]+r[1])/2),cz=Math.round((r[2]+r[3])/2);while(fieldPath(cx,cz))cx++;scarecrow(world,cx,cz);haystack(world,r[0]+1,r[3]-1);haystack(world,r[1]-1,r[2]+1)});
+ for(let x=-24;x<=-8;x+=4)for(let z=-52;z<=-36;z+=4)mulberry(world,x,z);
+ for(let x=36;x<=52;x+=4)for(let z=8;z<=20;z+=3)mulberry(world,x,z);
+ for(let i=0;i<50;i++){const x=4+Math.floor(R(0,25)),z=-54+Math.floor(R(0,21));if(!world.isSolid(x,z)&&!isPath(x,z))bamboo(world,x,z)}
+ for(let i=0;i<40;i++){const x=34+Math.floor(R(0,21)),z=30+Math.floor(R(0,24));if(!world.isSolid(x,z))bamboo(world,x,z)}
+ for(let i=0;i<14;i++){const x=-26+Math.floor(R(0,30)),z=37+Math.floor(R(0,15));if(!world.isSolid(x,z)&&!isPath(x,z)&&Math.abs(x)>4)peachTree(world,x,z,1)}
+ for(let x=-2;x<=1;x++){world.block(x,1,-62,'#060608',[1,4,1]);world.solid(x,-62)}
+ world.solid(3,-10);
+ scene.add(world.build());
+ prop(3.5,1,-9.5,1.4,0.9,1.4,'#808080');prop(3.0,1.9,-9.5,0.14,1.4,0.14,'#6b4423');prop(4.0,1.9,-9.5,0.14,1.4,0.14,'#6b4423');prop(3.5,3.3,-9.5,1.8,0.2,1.4,'#4a4458');prop(3.5,2.0,-9.5,0.4,0.4,0.4,'#8b5a2b');
+ prop(-34.5,0.95,-11.5,4,0.15,1.4,'#a67c52');[-36,-33.5].forEach(x=>{prop(x,0.3,-12.1,0.15,0.8,0.15,'#6b4423');prop(x,0.3,-10.9,0.15,0.8,0.15,'#6b4423')});
+ HOUSES.concat([MAIN]).forEach(h=>{const dx=h[0]+Math.floor(h[2]/2)+0.5;prop(dx+1.8,1,h[1]-0.5,0.6,0.7,0.6,'#8d6e63');prop(h[0]+h[2]-1.5,6,h[1]+h[3]-1.5,0.7,1.2,0.7,'#5d4a4a');addSmoke(h[0]+h[2]-1.5,7.2,h[1]+h[3]-1.5)});
+ addClouds(12,0,0,120);addMotes({n:70,colors:['#ffeb3b','#ff8a65','#ffffff','#ba68c8'],cx:0,cz:0,spread:52,ymin:1.5,ymax:4,kind:'fly',size:0.3});
+ addSign(-39.5,13.5,'↕ 阡：南北向的田間小路');addSign(-45.5,8.5,'↔ 陌：東西向的田間小路');addSign(43.5,-44.5,'↕ 阡　↔ 陌：阡陌交通');addSign(-20.5,40.5,'↕ 阡：南北向　↔ 陌：東西向');
+ [[43.5,-3.5],[47.5,1.5],[39.5,3.5],[49.5,-5.5],[33.5,-25.5],[-6.5,-8.5]].forEach(p=>addAnimal('chicken',p[0],p[1]));
+ [[-40.5,13.5],[45.5,29.5],[-6.5,-20.5]].forEach(p=>addAnimal('dog',p[0],p[1]));
+ addTrigger((x,z)=>fieldPath(Math.floor(x),Math.floor(z))!==null,()=>toast('腳下便是「阡陌」——南北向的小路叫「阡」，東西向的叫「陌」，縱橫交錯，四通八達，故曰「阡陌交通」。',6000),true);
+}
+function villageNPCModels(){return{
+ farmer:makeHuman({shirt:'#8a6d3b',pants:'#4a3b2a',hat:'douli',skin:'#d9a06a'}),
+ woman:makeHuman({shirt:'#b5565a',pants:'#5c4a6e',hairLong:true,skin:'#f0c9a0'}),
+ elder:makeHuman({shirt:'#6e6a5a',pants:'#4a4640',hair:'#e8e2c8',beard:'#e8e2c8',skin:'#dcb48c'}),
+ child:makeHuman({shirt:'#f0a540',pants:'#3f6ea8',scale:0.68,skin:'#f3cfa8'}),
+ weng:makeHuman({shirt:'#5a7f4a',pants:'#3b3b3b',hair:'#bdb8a8',beard:'#cfc9b8',robe:true,skin:'#dcb48c'}),
+ gate:makeHuman({shirt:'#4a4a6a',pants:'#333',hair:'#dcdcdc',beard:'#dcdcdc',robe:true,skin:'#d5ad86'})}}
+
+// ---------------------- 第一幕 ----------------------
+function setupAct1(){
+ clearScene();const cx0=buildRiverScene({});setCam(13);
+ ACTS[1].vocab.forEach((v,i)=>{const z=20+i*18,cx=riverCX(z);if(i%2===0)addScroll(cx+Math.round(R(-3,3))+0.5,1.6,z+0.5,v);else addScroll(cx+(i%4===1?9:-9)+0.5,2.6,z+0.5,v)});
+ placeBoat(riverCX(8)+0.5,8.5);placePlayer(boat.position.x,boat.position.z,Math.PI,true);createPetals();
+ mm.goal={x:cx0+0.5,z:206,label:'山口'};
+ addPassageTrigger((x,z)=>z>=14,'a1start');addPassageTrigger((x,z)=>z>=30,'a1forest');addPassageTrigger((x,z)=>z>=110,'a1deep');addPassageTrigger((x,z)=>z>=186,'a1end');addPassageTrigger((x,z)=>!P.onBoat&&z>=199,'a1cave');
+ addTrigger((x,z)=>!P.onBoat&&z>=206&&Math.abs(x-(cx0+0.5))<=2.6,async()=>{if(scrollsLeft()>0){toast('山口隱約有光……但還有 '+scrollsLeft()+' 卷字詞未收集，先沿溪找齊再進來吧！');return}await finishAct(1)});
+ setObjective('駕船沿溪而行（可按 E 上岸探索桃花林），收集所有字詞卷（看小地圖黃點）；找到溪水盡頭的山口，捨船上岸走進去。');mode='play';
+}
+// ---------------------- 第二幕（鏡頭鎖定） ----------------------
+function setupAct2(){
+ clearScene();buildCave();
+ setCamLock(true);camYaw=LOCK.yaw;camPitch=LOCK.pitch;camDist=LOCK.dist;camDistDefault=LOCK.dist;
+ [10,34,58].forEach((z,i)=>addScroll(0.5,1.6,z+0.5,ACTS[2].vocab[i]));
+ placePlayer(0.5,0.5,Math.PI,false);mm.goal={x:0.5,z:82,label:'洞口'};
+ addPassageTrigger((x,z)=>z>=3,'a2start');addPassageTrigger((x,z)=>z>=66,'a2open');
+ addTrigger((x,z)=>z>=80,async()=>{if(scrollsLeft()>0){toast('前面豁然開朗……但還有 '+scrollsLeft()+' 卷字詞未收集！');return}await finishAct(2)});
+ setObjective('山洞初極狹，才通人。向前走數十步，收集字詞卷，走到光亮開闊處。（本幕鏡頭固定為跟隨視角）');mode='play';
+ setTimeout(()=>toast('🔒 山洞狹窄，本幕鏡頭已鎖定為跟隨視角',2800),400);
+}
+// ---------------------- 第三幕 ----------------------
+async function setupAct3(){
+ clearScene();buildVillage();setCam(13);
+ [[0,-44],[-16,-30],[16,-30],[-41,10],[40,-30],[-28,12],[28,12],[0,40]].forEach((p,i)=>addScroll(p[0]+0.5,1.6,p[1]+0.5,ACTS[3].vocab[i]));
+ const M=villageNPCModels();
+ addNPC({name:'農夫阿田',x:-40.5,z:-41.5,model:M.farmer,lines:['客人從何處來？我正在田裏種作。這裏土地平曠，良田肥沃，年年都有好收成。',
+  {ask:'（你想問農夫甚麼？）',opts:[
+   {t:'這裏的田地為何這樣整齊？',r:['你看田間這些小路：南北走向的叫「阡」，東西走向的叫「陌」，縱橫交錯、四通八達，這就是「阡陌交通」。','有了阡陌，我們挑水、運糧、到鄰家串門都方便；雞鳴狗吠之聲，家家都聽得到（雞犬相聞）。']},
+   {t:'你們每天的生活是怎樣的？',r:['日出而作，日入而息。春耕夏耘，秋收冬藏，男耕女織，各有所務。','這裏沒有官府徭役，也沒有苛捐雜稅，種多少便吃多少，安樂得很。']},
+   {t:'外面的人也這樣耕種嗎？',r:['外面？老實說，我們祖祖輩輩都沒出過這山谷，只聽老人家說外面兵荒馬亂……','客人既是外面來的，待會可要給我們說說！']}]},
+  '我們每日往來耕種，不愁吃穿。']});
+ addNPC({name:'桑娘',x:-15.5,z:-31.5,model:M.woman,lines:['我在這桑林裏採桑葉養蠶，織布做衣。',
+  {ask:'（你想問桑娘甚麼？）',opts:[
+   {t:'你們的衣服是怎樣做的？',r:['養蠶吐絲，抽絲織帛；又種麻紡線，織成粗布。全村人的衣裳，都是這樣一針一線縫出來的。','你看，我們男女的衣着，是不是和你們外面的人一樣（悉如外人）？']},
+   {t:'這裏有美池，池裏養了甚麼？',r:['池裏有魚、有蓮，夏天荷花開滿一池，孩子們最愛在池邊玩。','良田、美池、桑、竹，都是我們賴以為生的東西——「之屬」，就是「這一類」的意思。']},
+   {t:'孩子們平日做甚麼？',r:['小的跟着娘親採桑餵雞，大一點的便下田幫忙。黃髮垂髫，都怡然自樂。']}]}]});
+ addNPC({name:'老者',x:21.5,z:-30.5,model:M.elder,lines:['老朽今年八十有三了，頭髮都黃了（黃髮）。',
+  {ask:'（你想問老者甚麼？）',opts:[
+   {t:'您在這裏住了多久？',r:['從出生到如今，八十多年，從未踏出過這山谷一步。我爹、我爺爺、爺爺的爺爺，也都是如此。','聽先人說，最早來這裏的祖先，是為了躲避秦時的戰亂……詳情你去問桃源翁吧，他記得最清楚。']},
+   {t:'為何以「黃髮」稱老人？',r:['人老了，頭髮先白後黃，故古人以「黃髮」稱老人；小孩頭髮下垂不束，便叫「垂髫」。','黃髮、垂髫，並怡然自樂——老的小的，都過得安閒自在啊。']},
+   {t:'您在這裏快樂嗎？',r:['在這裏安享晚年，每日曬曬太陽，聽聽雞犬之聲，不知兵戈，不憂飢寒，怡然自樂啊！']}]}]});
+ addNPC({name:'小童',x:-35.5,z:-13.5,model:M.child,face:0.6,lines:['哥哥你是誰？頭上戴的帽子好奇怪！',
+  {ask:'（你想對小童說甚麼？）',opts:[
+   {t:'我是外面來的漁人。',r:['外面？外面是甚麼地方？比山谷還大嗎？','娘親說外面有「打仗」，打仗是甚麼？是不是像狗兒搶骨頭那樣？']},
+   {t:'你平日玩甚麼？',r:['我和阿牛去美池看魚、在竹林捉迷藏，還會幫娘親撿雞蛋！','要不要一起去美池看魚？池裏的魚又大又肥！']}]},
+  '（小童頭髮下垂未束，這就是「垂髫」）']});
+ addNPC({name:'桃源翁',x:11.5,z:3.5,model:M.weng,star:true,lines:()=>scrollsLeft()>0?['客人……從何處來？老夫從未見過你。','你先在村中走走看看吧，把散落各處的字詞卷（還有 '+scrollsLeft()+' 卷）找齊了，再來找老夫。']:
+  ['啊！客人從何處來？老夫在此數十年，從未見過外人！（乃大驚，問所從來）',
+   {ask:'（你如何回答？）',opts:[
+    {t:'我是武陵的漁人，沿溪捕魚，誤入桃花林，穿過山口來到這裏。',r:['原來如此……（漁人具答之）武陵？老夫只在先人的口傳中聽過這名字。']},
+    {t:'我是……迷路的旅人。',r:['旅人？看你一身漁家打扮，手上還有魚腥味呢，哈哈！不必瞞老夫。','（漁人只好把沿溪而行、誤入桃花林的經過詳細說出——「具答之」）']}]},
+   '快快請到寒舍坐坐！老夫這就設酒、殺雞、作食，好好款待你！（便要還家）'],onDone:async n=>{if(scrollsLeft()>0){n.talked=false;mode='play';return}await finishAct(3)}});
+ placePlayer(0.5,-53.5,Math.PI,false);mm.goal={x:11.5,z:3.5,label:'桃源翁'};
+ addPassageTrigger((x,z)=>z>=-40,'a3land');addPassageTrigger((x,z)=>Math.abs(x)<8&&Math.abs(z)<8,'a3people');
+ setObjective('先欣賞桃花源的風光，然後自由探索，與村民對話（小地圖白點＝未對話村民，可選擇話題）；收集所有字詞卷後找「★桃源翁」對話。');
+ player.visible=false;
+ await cutscene([
+  {from:[0,64,-124],to:[0,30,-44],look:[0,0,0],dur:5.5,text:'土地平曠，屋舍儼然，有良田、美池、桑、竹之屬，'},
+  {from:[-56,18,-24],to:[56,18,20],look:[0,1,0],dur:6.5,text:'阡陌交通，雞犬相聞。其中往來種作，男女衣着，悉如外人。'},
+  {from:[28,8,-8],to:[18,6,-1],look:[11.5,1.5,3.5],dur:4.5,text:'黃髮、垂髫，並怡然自樂。'}]);
+ player.visible=true;mode='play';
+}
+// ---------------------- 第四幕 ----------------------
+function houseLeft(){return npcs.filter(n=>n.required&&!n.talked).length}
+async function setupAct4House(){
+ clearScene();act4Stage='house';buildRoom(22,18,['#a67c52','#9c7146','#b0855c'],'#e9dcc0','#6b4423');setCam(10);
+ setupLights({sky:0x1a1208,fog:[0x1a1208,20,50],hemiSky:0xffe0b0,hemiGround:0x4a3010,hemi:0.4,sun:0.3,sunColor:0xffd9a0});
+ for(let x=9;x<=12;x++){world.block(x,1,8,'#8b5a2b',[1,0.8,1]);world.solid(x,8)}
+ world.block(10,1.8,8,'#37474f',[0.35,0.5,0.35]);world.block(9,1.8,8,'#d4a05a',[0.6,0.35,0.6]);world.block(12,1.8,8,'#eceff1',[0.4,0.2,0.4]);world.block(11,1.8,8,'#c0392b',[0.3,0.3,0.3]);world.block(11,1.8,8,'#f5c542',[0.5,0.12,0.5]);
+ [[9,6],[12,6],[9,10],[12,10]].forEach(p=>world.block(p[0],1,p[1],'#6b4423',[0.5,0.5,0.5]));
+ for(let x=17;x<=20;x++)for(let z=15;z<=16;z++){world.block(x,1,z,'#6b4423',[1,0.5,1]);world.block(x,1.5,z,'#b0bec5',[1,0.3,1]);world.solid(x,z)}
+ for(let z=1;z<=5;z++){world.block(21,1,z,'#6b4423');world.block(21,2,z,pick(['#c0392b','#2980b9','#f1c40f']),[0.6,0.6,0.6]);world.solid(21,z)}
+ world.block(0,1,16,'#6b4423');world.solid(0,16);world.block(0,2,16,'#8b5a2b',[0.8,0.3,0.8]);world.block(0,1,14,'#777',[1,1.2,1]);world.solid(0,14);world.block(0,2.2,14,'#ff7a30',[0.5,0.2,0.5]);
+ [[1,2],[2,2],[1,3]].forEach(p=>{world.block(p[0],1,p[1],'#8d6e63',[0.6,0.7,0.6]);world.solid(p[0],p[1])});
+ for(let x=8;x<=13;x++)for(let z=11;z<=13;z++)world.block(x,1,z,pick(['#c9a86a','#c2a062']),[1,0.05,1]);
+ scene.add(world.build());
+ lamp(0.5,2.6,0.5);lamp(21.5,2.6,0.5);lamp(0.5,2.6,17.5);lamp(21.5,2.6,17.5);lamp(11,3.3,9,0xffd080,1.0,18);
+ [[5.5,4.5],[16.5,4.5],[5.5,13.5],[16.5,13.5]].forEach(p=>{lamp(p[0],3.2,p[1],0xff8a50,0.55,9,'#c0392b');prop(p[0],3.0,p[1],0.04,0.6,0.04,'#3b2a1a')});
+ lamp(0.5,2.4,14.5,0xff7a30,1.1,8,'#ff9a40');addSmoke(0.5,2.6,14.5);
+ [5,9,13].forEach(z=>{prop(0.06,1.3,z,0.08,1.4,0.9,'#f3e6c8');prop(0.1,1.6,z,0.04,0.8,0.5,'#2b1d0e')});prop(21.94,1.5,8.5,0.08,1.2,1.6,'#fff1c0');const wl=new THREE.PointLight(0xfff1c0,0.8,10);wl.position.set(21.4,2,8.5);scene.add(wl);
+ addMotes({n:40,colors:['#fff3d0','#ffe0a0'],cx:11,cz:9,spread:9,spreadZ:8,ymin:1.5,ymax:3.5,kind:'fly',size:0.1,opacity:0.35});
+ [[2.5,15.5],[19.5,12.5],[17.5,2.5]].forEach((p,i)=>addScroll(p[0],1.6,p[1],ACTS[4].vocab[i]));
+ const M=villageNPCModels();
+ const weng=addNPC({name:'桃源翁',x:11.5,z:11.5,model:M.weng,star:true,required:true,lines:['客人慢用，不必客氣！',
+  {ask:'（你想問桃源翁甚麼？）',opts:[
+   {t:'你們的祖先是怎樣來到這裏的？',r:['先世避秦時亂——秦朝末年，天下大亂，徭役繁重、戰火連天。','我們的祖先率領妻子兒女和同鄉（率妻子邑人），一路逃到這與外界隔絕的地方（絕境），從此不再出去（不復出焉）。']},
+   {t:'「絕境」是甚麼意思？',r:['「絕境」不是說走投無路，而是與外界隔絕的地方。四面環山，只有那條小溪和山口與外界相通。','數百年來，外面無人進來，我們也無人出去，遂與外人間隔。']},
+   {t:'你們真的不知道秦朝之後的事？',r:['真的不知。你說的漢、魏、晉，老夫今日才頭一回聽聞（乃不知有漢，無論魏、晉）。','外面幾百年來改朝換代、戰亂不休……聽了實在教人歎惋。']}]},
+  '屋裏的人都想和你談談，你也收拾好屋中的字詞卷，再出門到村中走走吧，各家都想請你去作客呢。'],onDone:async()=>{mode='play';updateHUD()}});
+ placePlayer(11.5,0.5,Math.PI,false);
+ setObjective('在桃源翁家中作客，聆聽桃花源的來歷。');
+ const spawnNPC=o=>{const n=addNPC(o);n.g.lookAt(P.x,n.g.position.y,P.z);return n};
+ await new Promise(r=>setTimeout(r,500));
+ await showPassage('a4home');
+ await say('桃源翁','客人請坐！老夫已吩咐家人設酒、殺雞、作食。你說你是武陵的漁人，是怎樣找到這裏的？');
+ const c=await choose('（你如何向桃源翁敘述？）',['從沿溪捕魚、忽逢桃花林說起，一一詳細道來。','簡單地說：我迷了路，走進山洞就到了。']);
+ if(c===0)await say('桃源翁','緣溪而行，忘路遠近，忽逢桃花林，林盡水源，便得一山……（漁人具答之）真是奇遇啊！');
+ else{await say('桃源翁','哦？只是迷路？老夫看你神色，必定還有更多可說的……');await say('漁人','（在桃源翁追問下，漁人只得把沿溪捕魚、忽逢桃花林、林盡水源、山口有光的經過一一詳細說出——「具答之」）')}
+ spawnNPC({name:'田叔',x:7.5,z:4.5,model:makeHuman({shirt:'#7a8a5a',pants:'#4a3b2a',skin:'#d9a06a'}),required:true,lines:['漁人兄弟，再喝一杯！這是我家自釀的米酒。',
+  {ask:'（你想問田叔甚麼？）',opts:[
+   {t:'這裏的收成好嗎？',r:['好得很！土地平曠，溪水灌田，一年兩熟。收了糧，各家自足有餘，還能釀酒。','聽先人說，秦時的賦稅徭役重得百姓活不下去，所以祖先才逃進來。外面現在還要向官府交租納糧嗎？']},
+   {t:'你們有官府嗎？',r:['沒有甚麼官府。村中大小事由長者商議，鄰里互助，從沒聽過要打仗、服徭役。','所以我們才能怡然自樂啊。']},
+   {t:'村裏的人都認識嗎？',r:['幾百人，誰家添了孩子、誰家母雞下了蛋，大家都知道。阡陌相連，雞犬相聞，哪有不認識的？']}]}]});
+ await say('田叔','聽說村裏來了外人，大家都趕來問訊了！（村中聞有此人，咸來問訊）');
+ spawnNPC({name:'阿嬸',x:15.5,z:4.5,model:makeHuman({shirt:'#9a5a7a',pants:'#5c4a6e',hairLong:true,skin:'#f0c9a0'}),required:true,lines:['客人多吃點雞肉！這是我今早剛殺的（設酒、殺雞，作食）。',
+  {ask:'（你想問阿嬸甚麼？）',opts:[
+   {t:'你們平日吃甚麼？',r:['米飯、青菜、池裏的魚、自家養的雞，桑樹結的桑果孩子最愛吃。','有客人來才殺雞呢，平日雞是留着下蛋的。']},
+   {t:'村裏有人來，大家都會來看嗎？',r:['對呀——村中聞有此人，咸來問訊。大家幾百年沒見過外人，誰不好奇？','你看，門外還有人探頭探腦呢！']},
+   {t:'這件衣服是你織的嗎？',r:['是啊，自己養蠶、紡線、織布、縫衣。外面的人也這樣穿吧？我看客人的衣着，和我們倒沒兩樣（悉如外人）。']}]}]});
+ await say('阿嬸','真的是外面來的人嗎？讓我看看！……衣着倒和我們一樣呢。');
+ spawnNPC({name:'長老',x:5.5,z:9.5,model:makeHuman({shirt:'#6e6a5a',pants:'#4a4640',hair:'#e8e2c8',beard:'#e8e2c8',skin:'#dcb48c'}),required:true,lines:['後生仔，老朽有些事想問你……',
+  {ask:'（你如何回應？）',opts:[
+   {t:'長老請問。',r:['現在外面……還是秦始皇在位嗎？徭役還那樣重嗎？（問今是何世）','（漁人一一為具言所聞）……甚麼？秦早亡了？之後有漢，漢後有魏，魏後是晉……竟然已經幾百年了！','這麼多朝代，這麼多戰亂……先人離開外面，真是對的。（皆歎惋）']},
+   {t:'長老，您為何這樣關心外面？',r:['老朽的祖父臨終前仍念着他小時候聽說的外面家鄉。數百年了，那地方不知變成甚麼樣子……','我們避了秦時的亂，卻也再沒見過外面的親人。唉。','那現在外面究竟是甚麼世代？（問今是何世）……漢？魏？晉？老朽一個也沒聽過（乃不知有漢，無論魏、晉）。']}]}]});
+ await say('長老','老朽也來瞧瞧……外面的人，果然和我們穿得一樣。');
+ await say('桃源翁','不瞞客人說，我們的先世避秦時亂，率妻子邑人來此絕境，不復出焉；遂與外人間隔。');
+ await say('桃源翁','大家都有許多話想問客人，客人就慢慢和他們聊聊吧！');
+ mode='play';mm.goal={x:11.5,z:-2,label:'門口'};setObjective('與屋中每一位村人對話（田叔、阿嬸、長老、桃源翁——小地圖白點），收集 3 卷字詞卷，然後從門口（南面）離開。');
+ addTrigger((x,z)=>z<-0.6,async()=>{const left=houseLeft();if(left>0){toast('屋裏還有 '+left+' 位村人想和你談談呢！');P.z=0.6;return}if(scrollsLeft()>0){toast('屋裏還有 '+scrollsLeft()+' 卷字詞卷未收集！');P.z=0.6;return}await setupAct4Village()});
+}
+function setupAct4Village(){
+ clearScene();buildVillage();setCam(13);act4Ready=false;act4Stage='village';
+ [[-40,0],[40,0],[-16,24],[16,24],[0,46]].forEach((p,i)=>addScroll(p[0]+0.5,1.6,p[1]+0.5,ACTS[4].vocab[3+i]));
+ const M=villageNPCModels();const done=async()=>{mode='play';checkAct4Progress()};
+ addNPC({name:'農夫阿田',x:-40.5,z:-41.5,model:M.farmer,villager:true,lines:['漁人兄弟，到我家喝杯濁酒吧！今年新收的米，蒸了一鍋香飯。',
+  {ask:'（你想和農夫談甚麼？）',opts:[
+   {t:'外面也有這樣的良田嗎？',r:['外面田地倒是有，可是戰亂一起，良田便成荒地……','聽你這樣說，真教人歎惋。我們世世代代在這裏耕種，從沒想過外面變了這麼多。']},
+   {t:'你會想到外面看看嗎？',r:['不想！這裏有良田美池，有雞犬相聞，何必出去受那兵荒馬亂？','倒是客人，你回去以後，可別把這裏的事說出去啊。']}]}],onDone:done});
+ addNPC({name:'桑娘',x:-15.5,z:-31.5,model:M.woman,villager:true,lines:['客人快來，我家裏備了酒食。這件新衣是我剛織好的，送給你路上穿吧。',
+  {ask:'（你想和桑娘談甚麼？）',opts:[
+   {t:'外面的人也養蠶織布嗎？',r:['也養蠶織布的？那就好。可是你說外面要交很重的稅……織一年的布，自己卻穿不上，那多可憐。']},
+   {t:'這份禮太貴重了。',r:['不貴重！餘人各復延至其家，皆出酒食——每一家都想好好招待你，這是我們的心意。']}]}],onDone:done});
+ addNPC({name:'老者',x:21.5,z:-30.5,model:M.elder,villager:true,lines:['年輕人，到老朽家坐坐，嘗嘗自釀的桃花酒。',
+  {ask:'（你想和老者談甚麼？）',opts:[
+   {t:'祖先當年為何離開外面？',r:['秦時徭役重、刑法苛，又連年征戰。祖先帶着妻兒鄉人逃進山裏，找到了這片絕境，從此安身。','聽說外面幾百年來戰亂不斷……唉，我們的祖先當年離開，真是對的。']},
+   {t:'桃花酒怎樣釀？',r:['春天收桃花，和新米一同封在罈裏，待到秋天開封，滿屋都是香氣。','這桃花酒，外面是喝不到的，哈哈。']}]}],onDone:done});
+ addNPC({name:'小童',x:-35.5,z:-13.5,model:M.child,face:0.6,villager:true,lines:['漁人哥哥！娘親叫你來我家吃飯，有雞腿！',
+  {ask:'（你想對小童說甚麼？）',opts:[
+   {t:'我過幾天便要回去了。',r:['那你還會回來嗎？我把最大的桃子留給你！']},
+   {t:'這裏真好，我想留下來。',r:['太好了！你可以住我家旁邊！','……可是爺爺說，外面的人終究要回外面去的。']}]}],onDone:done});
+ addNPC({name:'桃源翁',x:11.5,z:3.5,model:M.weng,lines:['客人到各家走走吧，大家都盼着你去作客呢。'],onDone:async()=>{mode='play'}});
+ addNPC({name:'村口老者',x:0.5,z:-50.5,model:M.gate,star:true,face:0,lines:()=>act4Ready?['客人，停留了數日，終究要走了嗎？','臨別有一句話叮囑：此中之事，「不足為外人道也」——不值得向外面的人說起啊。',
+  {ask:'（你如何回應？）',opts:[
+   {t:'我會記住的。',r:['好。去吧，願你一路平安。']},
+   {t:'為何不可向外人說？',r:['此地安寧，全因與世隔絕。若外人紛紛而至，桃花源便不再是桃花源了。','去吧，願你一路平安。']}]}]:
+  ['客人這麼快就想走？村中各家都想請你去作客呢，先去與大家談談、把字詞卷找齊吧！'],onDone:async()=>{if(act4Ready)await finishAct(4);else mode='play'}});
+ placePlayer(9.5,3.5,Math.PI,false);P.facing=Math.PI;
+ addPassageTrigger((x,z)=>Math.hypot(x-9.5,z-3.5)>7,'a4village');addPassageTrigger((x,z)=>act4Ready&&z<-40,'a4leave');
+ setObjective('餘人各復延至其家——到村中與每一位村民（農夫、桑娘、老者、小童，小地圖白點）對話，並收集所有字詞卷。');mode='play';
+}
+function checkAct4Progress(){if(act!==4||act4Stage!=='village'||act4Ready)return;const vs=npcs.filter(n=>n.villager);if(vs.length&&vs.every(n=>n.talked)&&scrollsLeft()===0){act4Ready=true;mm.goal={x:0.5,z:-50.5,label:'村口'};toast('停數日……漁人決定辭別。請到南面村口找「★村口老者」。',5000);setObjective('到南面村口（來時的山口）與「★村口老者」對話，辭別桃花源。')}}
+// ---------------------- 第五幕 ----------------------
+const MARK_SPOTS=[[172,1],[128,-1],[52,1]];   // [z, 河岸側：+1 右岸 / −1 左岸]
+function setupAct5(){
+ clearScene();const cx0=buildRiverScene({});setCam(13);markersPlaced=0;
+ const sp=[[170,'w'],[130,'l'],[90,'w'],[50,'l']];sp.forEach((s,i)=>{const z=s[0],cx=riverCX(z);if(s[1]==='w')addScroll(cx+0.5,1.6,z+0.5,ACTS[5].vocab[i]);else addScroll(cx+(i%4===1?-9:9)+0.5,2.6,z+0.5,ACTS[5].vocab[i])});
+ // 小船停在溪水盡頭、緊靠沙岸（z=195.5 為最後一列水面，沙岸由 z=197 起），從山洞下來即可登船
+ placeBoat(riverCX(195)+0.5,195.5);placePlayer(cx0+0.5,207.5,0,false);createPetals();
+ // 河岸標記處：位於水邊沙地（距溪心 6 格），分布左右兩岸
+ MARK_SPOTS.forEach(([z,side])=>addMarkSpot(riverCX(z)+side*6+0.5,z+0.5));
+ mm.goal={x:boat.position.x,z:boat.position.z,label:'小船'};
+ addPassageTrigger((x,z)=>z<=205.5,'a5start');
+ addTrigger((x,z)=>P.onBoat&&z<8,async()=>{if(markersPlaced<3){toast('還未「處處誌之」！要先在岸邊三處「🚩 標記處」做標記（已做 '+markersPlaced+'/3），回頭看看小地圖的紅色菱形。');return}if(scrollsLeft()>0){toast('還有 '+scrollsLeft()+' 卷字詞卷未收集！');return}await finishAct(5)});
+ setObjective('既出，得其船——走到岸邊登上小船（綠色目標）。沿溪而下，途中在三處「🚩 標記處」（河岸老樹旁，小地圖紅色菱形）按 E 做標記（處處誌之），把船靠岸或上岸皆可；收集字詞卷後駛回下游出發點。');mode='play';
+}
+// ---------------------- 第六幕 ----------------------
+function setupAct6(){
+ clearScene();buildRoom(26,22,['#6d3b2b','#75402f','#64362a'],'#d8c9a3','#5a2a1a');setCam(10);
+ setupLights({sky:0x1a1208,fog:[0x1a1208,22,55],hemiSky:0xffe0b0,hemiGround:0x3a2010,hemi:0.5,sun:0.4,sunColor:0xffd9a0});
+ [[4,6],[22,6],[4,14],[22,14]].forEach(p=>{world.block(p[0],1,p[1],'#8b1a1a',[1,3,1]);world.block(p[0],3.9,p[1],'#c9a227',[1.1,0.15,1.1]);world.solid(p[0],p[1])});
+ for(let x=8;x<=17;x++)for(let z=16;z<=18;z++){world.block(x,1,z,'#5a3a1a',[1,0.4,1]);world.set(x,z,1.4,'g')}
+ for(let x=12;x<=13;x++)for(let z=0;z<=15;z++){world.block(x,1,z,'#8b1a1a',[1,0.1,1]);world.set(x,z,1.1,'g')}
+ for(let x=6;x<=19;x++)world.block(x,1,20,x%2?'#c9a227':'#8b1a1a',[1,2.2,0.3]);
+ world.block(12,1.4,17,'#3b2a1a',[1.8,0.6,0.7]);world.solid(12,17);world.solid(13,17);world.block(12,2.0,17,'#f3e6c8',[0.6,0.08,0.4]);world.block(13,2.0,17,'#2b1d0e',[0.3,0.3,0.3]);
+ scene.add(world.build());
+ prop(13,1,20.5,7,2.8,0.3,'#1f2a3a');[10.5,13,15.5].forEach(x=>{prop(x,2.2,20.3,1.4,0.9,0.06,'#c9a227');prop(x,1.4,20.3,1.0,0.5,0.06,'#8b6a1a')});
+ [[2.5,6],[2.5,14],[23.5,6],[23.5,14]].forEach(p=>{prop(p[0]<10?0.06:25.94,1.0,p[1],0.08,2.6,1.2,'#8b1a1a');prop(p[0]<10?0.1:25.9,1.2,p[1],0.04,2.0,0.3,'#c9a227')});
+ [10.5,15.5].forEach(x=>{prop(x,1,17.5,0.6,0.5,0.6,'#5c6b4a');addSmoke(x,1.6,17.5)});
+ lamp(0.5,2.6,0.5);lamp(25.5,2.6,0.5);lamp(0.5,2.6,21.5);lamp(25.5,2.6,21.5);lamp(13,3.2,10.5,0xffd080,1.2,22);lamp(13,3.4,17.5,0xffd080,1.0,16);
+ [[7.5,4.5],[18.5,4.5],[7.5,12.5],[18.5,12.5]].forEach(p=>lamp(p[0],3.2,p[1],0xff8a50,0.55,9,'#c0392b'));
+ addMotes({n:50,colors:['#fff3d0','#ffe0a0'],cx:13,cz:11,spread:11,spreadZ:10,ymin:1.5,ymax:3.6,kind:'fly',size:0.1,opacity:0.3});
+ [[2.5,2.5],[23.5,2.5],[2.5,19.5],[23.5,19.5],[8.5,10.5],[17.5,10.5]].forEach((p,i)=>addScroll(p[0],1.6,p[1],ACTS[6].vocab[i]));
+ const taishou=makeHuman({shirt:'#9b2d2d',pants:'#222',hat:'official',robe:true,beard:'#333',skin:'#e8c39e'});
+ addNPC({name:'太守',x:12.5,z:18.5,model:taishou,star:true,lines:()=>scrollsLeft()>0?['漁人，你且先把堂上散落的字詞卷收拾好（還有 '+scrollsLeft()+' 卷），再向本官稟告。']:['聽聞你在武陵溪上有奇遇？那地方的人說自秦時便避居其中？','快把經過一一說來，不可遺漏！'],onDone:async n=>{if(scrollsLeft()>0){n.talked=false;mode='play';return}await orderingGame();await say('太守','奇哉！世上竟有如此地方。本官即刻遣人隨你前往，尋你所做的標記！');await act6Cutscenes();await showPassage('a6end',true);await finishAct(6)}});
+ [[6.5,18.5],[18.5,18.5]].forEach(p=>addNPC({name:'衛士',x:p[0],z:p[1],model:makeHuman({shirt:'#555c66',pants:'#333',helmet:true,skin:'#d9a06a'}),lines:['肅靜！太守在堂上。'],onDone:async()=>{mode='play'}}));
+ placePlayer(12.5,0.5,Math.PI,false);mm.goal={x:12.5,z:18.5,label:'太守'};
+ addPassageTrigger((x,z)=>z>=3,'a6start');
+ setObjective('及郡下，詣太守——收集太守府中的字詞卷，然後上前向「★太守」稟告奇遇。');mode='play';
+}
+async function act6Cutscenes(){
+ player.visible=false;clearScene();buildRiverScene({fog:true});
+ const cz=80,cx=riverCX(cz);const grp=[makeHuman({hat:'douli',shirt:'#4a6b8a',pants:'#5a4632',skin:'#e0ac69'}),makeHuman({shirt:'#555c66',pants:'#333',helmet:true}),makeHuman({shirt:'#555c66',pants:'#333',helmet:true})];
+ grp.forEach((m,i)=>{m.position.set(cx+10.5+i*1.3,2,cz+0.5+(i%2)*1.2);m.rotation.y=Math.PI+(i-1)*0.9;scene.add(m)});
+ P.x=cx+10;P.z=cz;
+ await cutscene([
+  {from:[riverCX(12)+0.5,10,-4],to:[cx+4,9,cz-12],look:[cx+10.5,2,cz+1],dur:7,text:'太守即遣人隨其往，尋向所誌……'},
+  {from:[cx+17,5,cz+10],to:[cx+16,5.5,cz+9],look:[cx+11,2,cz+1],dur:4.5,text:'遂迷，不復得路。'}]);
+ clearScene();buildRoom(14,12,['#8d6e63','#7d6054'],'#e6ddc8','#4e342e');setupLights({sky:0x0d0a08,fog:[0x0d0a08,18,40],hemiSky:0xffe0b0,hemiGround:0x2a1a10,hemi:0.35,sun:0.25,sunColor:0xffd9a0});
+ for(let x=5;x<=7;x++){world.block(x,1,7,'#6d4c41',[1,0.8,1]);world.solid(x,7)}
+ [[5,'#2980b9'],[6,'#c0392b'],[7,'#f1c40f']].forEach(b=>world.block(b[0],1.8,7,b[1],[0.6,0.25,0.7]));
+ for(let x=1;x<=12;x++)for(let y=1;y<=2;y++)world.block(x,y,10,pick(['#c0392b','#2980b9','#f1c40f','#7f8c8d']),[0.8,0.8,0.6]);
+ scene.add(world.build());lamp(9.5,1.9,7.5,0xffc070,1.0,12);lamp(3.5,1.9,7.5,0xffc070,0.8,10);prop(13.94,1.4,5,0.08,1.2,1.4,'#c9d8ff');const wl=new THREE.PointLight(0xaabbff,0.7,10);wl.position.set(13.4,2,5);scene.add(wl);
+ addMotes({n:30,colors:['#fff3d0'],cx:7,cz:6,spread:6,spreadZ:5,ymin:1.4,ymax:3.4,kind:'fly',size:0.1,opacity:0.3});
+ const liu=makeHuman({shirt:'#ecebe4',pants:'#4a4a4a',hat:'scholar',robe:true,beard:'#444',skin:'#ead1b0'});liu.position.set(6.5,1,8.5);liu.rotation.y=Math.PI;scene.add(liu);
+ P.x=6.5;P.z=4;
+ await cutscene([
+  {from:[6.5,9,-9],to:[6.5,4.5,1.5],look:[6.5,1.6,8],dur:6,text:'南陽劉子驥，高尚士也，聞之，欣然規往，'},
+  {from:[9.5,3,4],to:[8,2.8,5.5],look:[6.5,1.6,8.5],dur:5.5,text:'未果，尋病終，後遂無問津者。'}]);
+}
+
+// ---------------------- 幕流程 ----------------------
+function startAct(n){act=n;mode='intro';hudHL=[];showIntro(ACTS[n],()=>{$('actTitle').textContent=ACTS[n].title;renderHudText();updateTextPanel();switch(n){case 1:setupAct1();break;case 2:setupAct2();break;case 3:setupAct3();break;case 4:setupAct4House();break;case 5:setupAct5();break;case 6:setupAct6();break}})}
+async function finishAct(n){mode='quiz';$('prompt').style.display='none';toast('本幕完結！請回答內容理解題（全部答對才可進入下一幕）',3500);await new Promise(r=>setTimeout(r,600));for(const q of ACTS[n].comp){const first=await ask('comp',q);stats.cT++;if(first)stats.cF++;updateStats()}if(n<6)startAct(n+1);else showEnding()}
+
+// ---------------------- 原文浮現 ----------------------
+function showPassage(id,keepCam){const p=PASSAGES[id];if(!p||shownPassages.has(id))return Promise.resolve();shownPassages.add(id);
+ return new Promise(res=>{const prev=mode;mode='passage';holdCam=!!keepCam;$('prompt').style.display='none';sfx.chime();
+  (p.hl||[p.o]).forEach(h=>hudHL.push(h));renderHudText();
+  $('pOrig').textContent=p.o;$('pModern').textContent=p.m;$('pHint').textContent=camLocked?'（點擊此處提早繼續）':'（可拖曳畫面觀察四周・點擊此處提早繼續）';const el=$('passage');el.style.display='flex';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('show')));
+  const hold=clamp(2500+p.o.length*110+p.m.length*55,5000,15000);let finished=false,timer=null;
+  const finish=()=>{if(finished)return;finished=true;clearTimeout(timer);el.classList.remove('show');passageDismiss=null;
+   setTimeout(()=>{el.style.display='none';holdCam=false;if(mode==='passage')mode=(prev==='passage'?'play':prev);res()},1100)};
+  passageDismiss=finish;timer=setTimeout(finish,1100+hold)})}
+function dismissPassage(){if(passageDismiss)passageDismiss()}
+function renderHudText(){if(!act){$('hudText').innerHTML='';return}let s=ACTS[act].text;
+ hudHL.forEach((h,i)=>{const cls=i===hudHL.length-1?'cur':'done';s=s.split(h).join('\u0001'+cls+'\u0003'+h+'\u0002')});
+ s=s.replace(/\u0001(\w+)\u0003/g,'<span class="$1">').replace(/\u0002/g,'</span>').replace(/\n/g,'<br>');$('hudText').innerHTML=s}
+
+// ---------------------- 小地圖 ----------------------
+// 座標系說明：Three.js 為右手座標系，鏡頭預設朝 +z 看時畫面右方是 −x。
+// 因此小地圖以「+z 朝上、+x 朝左」繪製（即從正上方俯視），與畫面方向一致。
+function buildMinimapBase(w){
+ let minx=1e9,maxx=-1e9,minz=1e9,maxz=-1e9;const cells=[];
+ for(const [k,top] of w.H){const i=k.indexOf(',');const x=+k.slice(0,i),z=+k.slice(i+1);if(x<minx)minx=x;if(x>maxx)maxx=x;if(z<minz)minz=z;if(z>maxz)maxz=z;cells.push([x,z,w.T.get(k),w.S.has(k)])}
+ if(!cells.length)return;const W=maxx-minx+1,D=maxz-minz+1;const cv=document.createElement('canvas');cv.width=W;cv.height=D;const c=cv.getContext('2d');
+ for(const [x,z,ty,so] of cells){c.fillStyle=ty==='w'?'#3f8fe0':ty==='s'?'#d9c27a':ty==='r'?'#3c3c42':(so?'#2f6b25':'#58a03f');c.fillRect(maxx-x,maxz-z,1,1)}
+ mm.base=cv;mm.b={minx,maxx,minz,maxz,W,D};
+}
+function screenArrow(dx,dz,d){const fx=-Math.sin(camYaw),fz=-Math.cos(camYaw),rx=Math.cos(camYaw),rz=-Math.sin(camYaw);const f=(dx*fx+dz*fz)/d,r=(dx*rx+dz*rz)/d;const ang=Math.atan2(r,f);const arrows=['⬆️','↗️','➡️','↘️','⬇️','↙️','⬅️','↖️'];return arrows[((Math.round(ang/(Math.PI/4))%8)+8)%8]}
+function nearestOf(list){let best=null,bd=1e9;for(const o of list){const d=Math.hypot(o.x-P.x,o.z-P.z);if(d<bd){bd=d;best=o}}return best?{o:best,d:bd}:null}
+function drawMinimap(){const c=mm.ctx,S=mm.cv.width;c.fillStyle='#1a1208';c.fillRect(0,0,S,S);if(!mm.base||!mm.b){$('mmHint').textContent='—';return}
+ const b=mm.b,sc=Math.min((S-8)/b.W,(S-8)/b.D),ox=(S-b.W*sc)/2,oz=(S-b.D*sc)/2;
+ c.imageSmoothingEnabled=false;c.drawImage(mm.base,ox,oz,b.W*sc,b.D*sc);
+ const X=x=>ox+(b.maxx-x)*sc,Z=z=>oz+(b.maxz-z)*sc;        // +x 朝左、+z 朝上
+ const pulse=0.5+0.5*Math.sin(t*5);const showPend=(act===3||act===4);
+ if(mm.goal){c.fillStyle='#2ecc71';c.beginPath();const gx=X(mm.goal.x),gz=Z(mm.goal.z);c.moveTo(gx,gz-7);c.lineTo(gx+7,gz);c.lineTo(gx,gz+7);c.lineTo(gx-7,gz);c.closePath();c.fill();c.strokeStyle='#fff';c.lineWidth=1.5;c.stroke()}
+ // 第五幕標記處：空心紅菱形＝未標記（脈動），實心＝已標記
+ for(const s of markSpots){const x=X(s.x),z=Z(s.z);c.beginPath();c.moveTo(x,z-6);c.lineTo(x+6,z);c.lineTo(x,z+6);c.lineTo(x-6,z);c.closePath();
+  if(s.done){c.fillStyle='#d9323c';c.fill();c.strokeStyle='#fff';c.lineWidth=1;c.stroke()}
+  else{c.strokeStyle='#ff6b6b';c.lineWidth=2;c.stroke();c.strokeStyle='rgba(255,107,107,'+(0.9-pulse*0.6)+')';c.beginPath();c.arc(x,z,9+pulse*5,0,Math.PI*2);c.stroke()}}
+ for(const s of scrolls){if(s.taken)continue;const x=X(s.x),z=Z(s.z);c.fillStyle='#ffe066';c.beginPath();c.arc(x,z,4+pulse*2,0,Math.PI*2);c.fill();c.strokeStyle='rgba(255,224,102,'+(0.9-pulse*0.6)+')';c.lineWidth=2;c.beginPath();c.arc(x,z,8+pulse*5,0,Math.PI*2);c.stroke()}
+ // NPC：★金點；未對話＝白點＋脈動光環；已對話＝淡綠小點
+ for(const n of npcs){const x=X(n.g.position.x),z=Z(n.g.position.z);
+  if(n.star){c.fillStyle='#f5c542';c.beginPath();c.arc(x,z,4.5,0,Math.PI*2);c.fill();c.strokeStyle='#2b1d0e';c.lineWidth=1;c.stroke()}
+  else if(!n.talked){c.fillStyle='#ffffff';c.beginPath();c.arc(x,z,4,0,Math.PI*2);c.fill();if(showPend){c.strokeStyle='rgba(255,255,255,'+(0.9-pulse*0.6)+')';c.lineWidth=2;c.beginPath();c.arc(x,z,7+pulse*4,0,Math.PI*2);c.stroke()}}
+  else{c.fillStyle='rgba(159,216,160,0.75)';c.beginPath();c.arc(x,z,3,0,Math.PI*2);c.fill()}}
+ if(boat&&!P.onBoat){c.fillStyle='#8b5a2b';c.fillRect(X(boat.position.x)-3,Z(boat.position.z)-3,6,6);c.strokeStyle='#fff';c.lineWidth=1;c.strokeRect(X(boat.position.x)-3,Z(boat.position.z)-3,6,6)}
+ const px=X(P.x),pz=Z(P.z);c.save();c.translate(px,pz);c.rotate(-P.facing);c.fillStyle='#ff3b30';c.beginPath();c.moveTo(0,-8);c.lineTo(6,6);c.lineTo(0,3);c.lineTo(-6,6);c.closePath();c.fill();c.strokeStyle='#fff';c.lineWidth=1.5;c.stroke();c.restore();
+ c.save();c.translate(px,pz);c.rotate(-camYaw+Math.PI);c.fillStyle='rgba(255,255,255,0.18)';c.beginPath();c.moveTo(0,0);c.arc(0,0,22,-Math.PI/2-0.45,-Math.PI/2+0.45);c.closePath();c.fill();c.restore();
+ // 提示文字：字詞卷 → 標記處 → 未對話村民 → 目標
+ let line1='';const ns=nearestOf(scrolls.filter(s=>!s.taken));
+ if(ns)line1='📜 最近字詞卷 '+screenArrow(ns.o.x-P.x,ns.o.z-P.z,ns.d)+' 約 '+Math.round(ns.d)+' 步（餘 '+scrollsLeft()+' 卷）';
+ else{const sp=nearestOf(markSpots.filter(s=>!s.done));
+  if(sp)line1='🚩 最近標記處 '+screenArrow(sp.o.x-P.x,sp.o.z-P.z,sp.d)+' 約 '+Math.round(sp.d)+' 步（餘 '+spotsLeft()+' 處）';
+  else if(showPend){const pend=npcs.filter(n=>!n.star&&!n.talked).map(n=>({x:n.g.position.x,z:n.g.position.z,name:n.name}));const np=nearestOf(pend);
+   if(np)line1='💬 未對話：'+np.o.name+' '+screenArrow(np.o.x-P.x,np.o.z-P.z,np.d)+' 約 '+Math.round(np.d)+' 步（餘 '+pend.length+' 位）'}}
+ let line2='';if(mm.goal){const d=Math.hypot(mm.goal.x-P.x,mm.goal.z-P.z);line2='🟢 目標：'+mm.goal.label+'（約 '+Math.round(d)+' 步）'}
+ $('mmHint').innerHTML=line1&&line2?line1+'<br>'+line2:(line1||line2||'字詞卷已集齊');
+}
+
+// ---------------------- 更新 ----------------------
+function cellOK(x,z){return P.onBoat?world.isWater(x,z):world.canWalk(x,z,P.y)}
+function tryMove(dx,dz){const nx=P.x+dx,nz=P.z+dz,r=P.onBoat?0.55:0.28;const ok=[[nx-r,nz-r],[nx+r,nz-r],[nx-r,nz+r],[nx+r,nz+r]].every(c=>cellOK(Math.floor(c[0]),Math.floor(c[1])));if(ok){P.x=nx;P.z=nz}}
+function updateCameraKeys(dt){
+ if(camLocked){if(keys.ArrowLeft||keys.ArrowRight||keys.ArrowUp||keys.ArrowDown||keys.Equal||keys.Minus||zoomDir)lockNotice();return}
+ if(keys.ArrowLeft)camYaw+=2.2*dt;if(keys.ArrowRight)camYaw-=2.2*dt;
+ if(keys.ArrowUp)camPitch=clamp(camPitch+1.4*dt,CAM.minP,CAM.maxP);if(keys.ArrowDown)camPitch=clamp(camPitch-1.4*dt,CAM.minP,CAM.maxP);
+ if(keys.Equal||keys.NumpadAdd)camDist=clamp(camDist-14*dt,CAM.minD,CAM.maxD);if(keys.Minus||keys.NumpadSubtract)camDist=clamp(camDist+14*dt,CAM.minD,CAM.maxD);
+ if(zoomDir)camDist=clamp(camDist+zoomDir*14*dt,CAM.minD,CAM.maxD);
+}
+function updatePlayer(dt){
+ let fwd=(keys.KeyW?1:0)-(keys.KeyS?1:0),str=(keys.KeyD?1:0)-(keys.KeyA?1:0);
+ if(joy.id!==null&&Math.hypot(joy.x,joy.y)>0.15){fwd+=-joy.y;str+=joy.x}
+ const fx=-Math.sin(camYaw),fz=-Math.cos(camYaw),rx=Math.cos(camYaw),rz=-Math.sin(camYaw);
+ let dx=fx*fwd+rx*str,dz=fz*fwd+rz*str;let len=Math.hypot(dx,dz);P.moving=len>0.05;
+ if(P.moving){const amt=Math.min(1,len);dx/=len;dz/=len;const sp=(P.onBoat?7.0:5.3)*dt*amt;tryMove(dx*sp,0);tryMove(0,dz*sp);P.facing=Math.atan2(dx,dz)}
+ if(P.onBoat){boat.position.set(P.x,0.6+Math.sin(t*2)*0.03,P.z);boat.rotation.y=lerpAngle(boat.rotation.y,P.facing,1-Math.pow(0.01,dt));boat.rotation.z=Math.sin(t*1.5)*0.02;player.position.set(P.x,1.05,P.z)}
+ else{const ty=world.top(Math.floor(P.x),Math.floor(P.z));if(ty!==undefined)P.y+=(ty-P.y)*Math.min(1,dt*14);player.position.set(P.x,P.y,P.z)}
+ player.rotation.y=lerpAngle(player.rotation.y,P.facing,1-Math.pow(0.0005,dt));animateHuman(player,P.moving,dt);
+ checkScrolls();checkTriggers();updatePrompt();
+}
+async function checkScrolls(){for(const s of scrolls){if(s.taken)continue;if(Math.hypot(s.x-P.x,s.z-P.z)<1.2){s.taken=true;scene.remove(s.g);sfx.pick();const first=await ask('vocab',s.v);stats.vT++;if(first)stats.vF++;updateStats();mode='play';updateHUD();checkAct4Progress();return}}}
+function checkTriggers(){const now=performance.now();for(let i=0;i<triggers.length;i++){const tr=triggers[i];if(now<tr.until)continue;if(tr.test(P.x,P.z)){tr.until=now+3000;if(tr.once)triggers.splice(i,1);tr.fn();break}}}
+function getInteraction(){
+ let best=null,bd=2.6;for(const n of npcs){const d=Math.hypot(n.g.position.x-P.x,n.g.position.z-P.z);if(d<bd){bd=d;best=n}}
+ if(best)return{label:'[E] 與'+best.name+'對話',fn:()=>talkTo(best)};
+ if(act===5){const s=nearSpot();if(s)return{label:'[E] 在此處做標記（'+markersPlaced+'/3）',fn:()=>placeMarker(s)}}
+ if(boat){if(P.onBoat){if(findLanding())return{label:'[E] 捨船上岸',fn:disembark}}else if(Math.hypot(boat.position.x-P.x,boat.position.z-P.z)<BOARD_DIST)return{label:'[E] 登船',fn:board}}
+ return null;
+}
+function findLanding(){const cx=Math.floor(P.x),cz=Math.floor(P.z);let best=null,bd=9;for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++){const x=cx+dx,z=cz+dz;const ty=world.type(x,z);if((ty==='g'||ty==='s')&&!world.isSolid(x,z)){const d=Math.hypot(x+0.5-P.x,z+0.5-P.z);if(d<bd){bd=d;best={x,z}}}}return best}
+function disembark(){const c=findLanding();if(!c){toast('附近沒有可以上岸的地方');return}P.x=c.x+0.5;P.z=c.z+0.5;P.y=world.top(c.x,c.z);P.onBoat=false;toast(act===1?'便舍船，從口入——漁人捨船上岸':'漁人上岸',1800)}
+function board(){P.onBoat=true;P.x=boat.position.x;P.z=boat.position.z;if(act===5)mm.goal={x:riverCX(6)+0.5,z:6,label:'溪水下游'};toast(act===5?'既出，得其船——登船沿溪返回下游，記得途中在三處標記處「處處誌之」':'登船',2600)}
+function placeMarker(s){if(!s||s.done)return;const m=makeMarker();m.position.set(s.x+0.1,s.g.position.y,s.z-0.2);scene.add(m);markersArr.push(m);
+ s.done=true;s.g.remove(s.beam);s.label.textContent='✓ 已誌之';markersPlaced++;sfx.place();toast('處處誌之——已在此處做標記 '+markersPlaced+'/3',2000);
+ if(markersPlaced>=3){setObjective('三處標記已做好！'+(P.onBoat?'':'回到小船登船，')+'沿溪駛回下游出發點。'+(scrollsLeft()?'（記得收集餘下的字詞卷）':''));if(!P.onBoat&&boat)mm.goal={x:boat.position.x,z:boat.position.z,label:'小船'}}
+ updateHUD()}
+function interact(){if(mode!=='play')return;const it=getInteraction();if(it)it.fn()}
+function updatePrompt(){const it=getInteraction();const el=$('prompt');if(it){el.textContent=it.label;el.style.display='block'}else el.style.display='none'}
+async function runLines(n,lines){for(const l of lines){if(typeof l==='string')await say(n.name,l);else if(l.ask){const i=await choose(l.ask,l.opts.map(o=>o.t));await runLines(n,l.opts[i].r||[])}else await say(l.who||n.name,l.text)}}
+async function talkTo(n){mode='dialog';$('prompt').style.display='none';n.g.lookAt(P.x,n.g.position.y,P.z);const lines=typeof n.lines==='function'?n.lines():n.lines;await runLines(n,lines);n.talked=true;if(n.villager||n.required)n.label.textContent='✓ '+n.name;if(n.onDone)await n.onDone(n);else mode='play'}
+function updateCamera(dt){const g=camGoal();const k=1-Math.pow(0.0001,dt);
+ if(world&&!P.onBoat&&!camLocked){const gy=world.top(Math.floor(g.pos.x),Math.floor(g.pos.z));if(gy!==undefined&&g.pos.y<gy+0.6)g.pos.y=gy+0.6}
+ camera.position.lerp(g.pos,k);camLook.lerp(g.look,k);
+ if(camLocked)lockClamp(camera.position);
+ camera.lookAt(camLook)}
+function updateNPCs(dt){for(const n of npcs)animateHuman(n.g,false,dt)}
+function updateAnimals(dt){for(const a of animals){a.timer-=dt;if(a.timer<=0){a.timer=1.5+Math.random()*3;a.tx=a.hx+(Math.random()-0.5)*8;a.tz=a.hz+(Math.random()-0.5)*8}const dx=a.tx-a.g.position.x,dz=a.tz-a.g.position.z,d=Math.hypot(dx,dz);if(d>0.2){const nx=a.g.position.x+dx/d*a.speed*dt,nz=a.g.position.z+dz/d*a.speed*dt;if(world&&world.canWalk(Math.floor(nx),Math.floor(nz),1)){a.g.position.x=nx;a.g.position.z=nz;a.g.rotation.y=Math.atan2(dx,dz);if(a.type==='chicken')a.g.position.y=1+Math.abs(Math.sin(t*12))*0.08}else a.timer=0}if(a.type==='dog'&&a.g.userData.tail)a.g.userData.tail.rotation.y=Math.sin(t*8)*0.5}}
+function updateScrolls(dt){for(const s of scrolls){if(s.taken)continue;s.g.position.y=s.y+Math.sin(t*3+s.x)*0.15;s.g.rotation.y+=dt*2}
+ for(const s of markSpots){if(!s.done)s.beam.material.opacity=0.14+0.1*Math.sin(t*3+s.z)}}
+function updatePetals(dt){if(!petals)return;const a=petals.geometry.attributes.position.array;for(let i=0;i<a.length;i+=3){a[i+1]-=dt*1.1;a[i]+=Math.sin(t*2+i)*dt*0.5;if(a[i+1]<1.5){a[i+1]=10+Math.random()*6;a[i]=P.x+(Math.random()-0.5)*88;a[i+2]=P.z+(Math.random()-0.5)*120}}petals.geometry.attributes.position.needsUpdate=true}
+function projectLabel(el,x,y,z,maxD){const d=Math.hypot(x-P.x,z-P.z);if(d>maxD||mode==='cutscene'){el.style.display='none';return}const v=new THREE.Vector3(x,y,z).project(camera);if(v.z>1||Math.abs(v.x)>1.1||Math.abs(v.y)>1.1){el.style.display='none';return}el.style.display='block';el.style.left=(v.x+1)/2*innerWidth+'px';el.style.top=(1-v.y)/2*innerHeight+'px'}
+function updateLabels(){for(const n of npcs)projectLabel(n.label,n.g.position.x,n.g.position.y+2.3*n.g.scale.y,n.g.position.z,26);for(const s of signs)projectLabel(s.label,s.g.position.x,s.g.position.y+2.0,s.g.position.z,24);for(const s of markSpots)projectLabel(s.label,s.x,s.g.position.y+3.2,s.z,s.done?14:40)}
+function updateSun(){if(!sun)return;sun.position.set(P.x+40,70,P.z+25);sun.target.position.set(P.x,0,P.z);sun.target.updateMatrixWorld()}
+function cutscene(steps){return new Promise(res=>{mode='cutscene';$('prompt').style.display='none';cut={steps,i:0,t:0,res};camera.position.copy(V(steps[0].from));showSubtitle(steps[0].text)})}
+function updateCutscene(dt){const s=cut.steps[cut.i];cut.t+=dt;const k=Math.min(1,cut.t/s.dur),e=k<0.5?2*k*k:1-Math.pow(-2*k+2,2)/2;camera.position.lerpVectors(V(s.from),V(s.to),e);camera.lookAt(V(s.look));if(cut.t>=s.dur+1.0){cut.i++;cut.t=0;if(cut.i>=cut.steps.length){hideSubtitle();const r=cut.res;cut=null;camLook.copy(V(s.look));r();return}camera.position.copy(V(cut.steps[cut.i].from));showSubtitle(cut.steps[cut.i].text)}}
+function skipCutStep(){if(cut){const s=cut.steps[cut.i];cut.t=s.dur+1.0}}
+
+let frame=0;
+function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),0.05);t+=dt;frame++;
+ if(mode==='play'||mode==='passage')updateCameraKeys(dt);
+ if(mode==='play')updatePlayer(dt);else if(!P.onBoat&&player.parent)animateHuman(player,false,dt);
+ updateNPCs(dt);updateAnimals(dt);updateScrolls(dt);updatePetals(dt);updateClouds(dt);updateMotes(dt);updateLamps();
+ if(world&&world.waterMesh)world.waterMesh.position.y=Math.sin(t*1.5)*0.04;
+ if(mode==='cutscene'&&cut)updateCutscene(dt);else if(mode!=='title'&&!holdCam)updateCamera(dt);
+ if(sky)sky.position.copy(camera.position);
+ updateSun();updateLabels();if(frame%2===0&&mode!=='title')drawMinimap();renderer.render(scene,camera)}
+
+// ---------------------- UI ----------------------
+let dialogResolve=null,choosing=false;
+function say(who,text){return new Promise(res=>{mode='dialog';choosing=false;$('dlgName').textContent=who;$('dlgText').textContent=text;$('dlgOpts').style.display='none';$('dlgOpts').innerHTML='';$('dlgNext').style.display='block';$('dialog').style.display='block';dialogResolve=res})}
+function choose(prompt,opts){return new Promise(res=>{mode='dialog';choosing=true;dialogResolve=null;$('dlgName').textContent='漁人（你）';$('dlgText').textContent=prompt;const box=$('dlgOpts');box.innerHTML='';box.style.display='grid';$('dlgNext').style.display='none';
+ opts.forEach((o,i)=>{const b=document.createElement('button');b.className='dopt';b.textContent=(i+1)+'. '+o;b.onclick=e=>{e.stopPropagation();if(!choosing)return;choosing=false;box.style.display='none';beep(880,.06);res(i)};box.appendChild(b)});$('dialog').style.display='block'})}
+function advanceDialog(){if(choosing)return;if(dialogResolve){const r=dialogResolve;dialogResolve=null;$('dialog').style.display='none';r()}}
+function ask(kind,q){return new Promise(res=>{mode='quiz';$('qkind').textContent=kind==='vocab'?'📖 重點字詞':'📝 內容理解';
+ $('qtext').innerHTML=kind==='vocab'?'原句：「<b>'+q.s+'</b>」<br>當中「<span class="hl">'+q.w+'</span>」的意思是？':q.q;
+ const opts=$('qopts');opts.innerHTML='';$('qfeed').innerHTML='';$('qnext').style.display='none';let first=true,done=false;
+ const order=[0,1,2,3].sort(()=>Math.random()-0.5);
+ order.forEach(i=>{const b=document.createElement('button');b.className='opt';b.textContent=q.o[i];b.onclick=()=>{if(done)return;if(i===q.a){done=true;b.classList.add('ok');$('qfeed').innerHTML='✅ 答對了！'+(q.e?'<br>'+q.e:'');$('qnext').style.display='inline-block';sfx.ok();opts.querySelectorAll('.opt').forEach(x=>x.disabled=true)}else{first=false;b.classList.add('bad');b.disabled=true;$('qfeed').textContent='❌ 再想一想……';sfx.bad()}};opts.appendChild(b)});
+ $('qnext').onclick=()=>{$('modal').style.display='none';res(first)};$('modal').style.display='flex'})}
+function orderingGame(){return new Promise(res=>{mode='order';$('qkind').textContent='🗂 事件排序：向太守交代奇遇經過';$('qtext').innerHTML='請按故事發生的先後次序，依次點選以下事件：';
+ const items=EVENTS.map((tx,i)=>({tx,i})).sort(()=>Math.random()-0.5);let next=0;$('qfeed').textContent='';$('qnext').style.display='none';
+ const render=()=>{const opts=$('qopts');opts.innerHTML='';items.forEach(it=>{const b=document.createElement('button');b.className='opt';b.textContent=it.i<next?(it.i+1)+'. '+it.tx:it.tx;if(it.i<next){b.classList.add('ok');b.disabled=true}
+  b.onclick=()=>{if(it.i===next){next++;sfx.ok();$('qfeed').textContent='✅ 正確！請繼續……';if(next===EVENTS.length){$('qfeed').textContent='🎉 全部排對了！漁人把奇遇一一告訴了太守。';$('qnext').style.display='inline-block'}render()}else{sfx.bad();next=0;$('qfeed').textContent='❌ 次序不對，請從頭再排一次！';render()}};opts.appendChild(b)})};
+ render();$('qnext').onclick=()=>{$('modal').style.display='none';res()};$('modal').style.display='flex'})}
+function toast(msg,ms){const el=$('toast');el.textContent=msg;el.style.display='block';clearTimeout(toastLock);toastLock=setTimeout(()=>el.style.display='none',ms||3000)}
+function showSubtitle(tx){const el=$('subtitle');el.innerHTML=tx+'<small>（點擊畫面跳過）</small>';el.style.display='block'}
+function hideSubtitle(){$('subtitle').style.display='none'}
+function setObjective(s){objective=s;updateHUD()}
+function updateHUD(){let s=objective;if(scrolls.length)s+='<br>📜 字詞卷 '+(scrolls.length-scrollsLeft())+'/'+scrolls.length;if(act===4&&act4Stage==='house'){const req=npcs.filter(n=>n.required);if(req.length)s+='　💬 對話 '+req.filter(n=>n.talked).length+'/'+req.length}if(act===4&&act4Stage==='village'){const vs=npcs.filter(n=>n.villager);if(vs.length)s+='　💬 對話 '+vs.filter(n=>n.talked).length+'/'+vs.length}if(act===5)s+='　🚩 標記 '+markersPlaced+'/3';$('obj').innerHTML=s}
+function updateStats(){$('statText').textContent='字詞首次答對 '+stats.vF+'/'+stats.vT+'　理解首次答對 '+stats.cF+'/'+stats.cT}
+function updateTextPanel(){const el=$('textPanel');el.innerHTML='<h3 style="color:#f5c542;margin-bottom:8px">《桃花源記》陶淵明　<span style="float:right;cursor:pointer" id="closeText">✕</span></h3>'+FULLTEXT.map(p=>'<p>'+p+'</p>').join('')+(act?'<h3 style="color:#f5c542;margin:10px 0 6px">本幕原文</h3><p class="cur">'+(ACTS[act].text||'').replace(/\n/g,'<br>')+'</p>':'');$('closeText').onclick=()=>el.style.display='none'}
+function showIntro(a,onStart){$('overlay').innerHTML='<div class="panel pixel big"><h2>'+a.title+'</h2><p class="classic">'+a.text.replace(/\n/g,'<br>')+'</p><div style="text-align:center"><button class="btn" id="introBtn">開始本幕 ▶</button></div></div>';$('overlay').style.display='flex';$('introBtn').onclick=()=>{$('overlay').style.display='none';onStart()}}
+function showTitle(){mode='title';scene.background=new THREE.Color(0x1a1208);$('overlay').innerHTML='<div class="panel pixel"><h1>桃花源記</h1><p style="font-size:20px;color:#f5c542;letter-spacing:4px;margin:6px 0 14px">漁人奇遇・3D 中文教育 RPG</p><p>你將代入<b>武陵漁人</b>，沿溪而行、誤入桃花源、作客數日、處處誌之、再尋無果——在六幕情節中掌握《桃花源記》的重點字詞與內容。</p><table class="keys">'+(isTouch?'<tr><td>左下搖桿</td><td>移動（駕船 / 步行）</td></tr><tr><td>單指在畫面上拖曳</td><td>360° 旋轉 / 俯仰鏡頭</td></tr><tr><td>雙指開合 或 🔍+ 🔍−</td><td>拉近 / 推遠鏡頭（⟲ 重置）</td></tr><tr><td>右下「E」鍵 / 點黃色提示</td><td>對話、上岸、登船、做標記</td></tr><tr><td>點對話框 / 點選項</td><td>繼續對話 / 選擇話題</td></tr>':'<tr><td>W / A / S / D</td><td>移動（駕船 / 步行）</td></tr><tr><td>滑鼠拖曳 或 ← → ↑ ↓</td><td>360° 旋轉 / 俯仰鏡頭</td></tr><tr><td>滑鼠滾輪 或 + / −</td><td>拉近 / 推遠鏡頭（⟲ 重置）</td></tr><tr><td>E / Space / Enter</td><td>對話、上岸、登船、做標記、繼續</td></tr><tr><td>1 / 2 / 3</td><td>選擇對話選項</td></tr>')+'<tr><td>小地圖（右上）</td><td>🟡字詞卷　⚪未對話村民　🔶標記處　🟢本幕目標　點地圖可放大</td></tr><tr><td>🔒 第二幕山洞</td><td>洞道狹窄，鏡頭固定為跟隨視角</td></tr></table><p style="font-size:13px;opacity:.75">'+(isTouch?'建議 iPad 橫向、全螢幕（右上 ⛶）遊玩｜':'')+'依《桃花源記場景劃分及學習重點安排》設計｜像素方塊風格</p><button class="btn" id="startBtn">開始遊戲 ▶</button></div>';$('overlay').style.display='flex';$('startBtn').onclick=()=>{getCtx();musicStart();beep(660,.1);$('overlay').style.display='none';startAct(1)}}
+function showEnding(){mode='ending';const vp=stats.vT?Math.round(stats.vF/stats.vT*100):0,cp=stats.cT?Math.round(stats.cF/stats.cT*100):0;$('overlay').innerHTML='<div class="panel pixel"><h2>後遂無問津者……</h2><p class="classic" style="text-align:left">'+FULLTEXT.join('<br>')+'</p><h3 style="text-align:center;border:none">學習成績</h3><p>📖 重點字詞：首次答對 <b style="color:#f5c542">'+stats.vF+' / '+stats.vT+'</b>（'+vp+'%）<br>📝 內容理解：首次答對 <b style="color:#f5c542">'+stats.cF+' / '+stats.cT+'</b>（'+cp+'%）</p><p style="font-size:14px;opacity:.85">桃花源究竟在哪裏？也許，它只存在於每個嚮往和平安樂的人心中。</p><button class="btn" id="againBtn">重新開始 ↻</button></div>';$('overlay').style.display='flex';$('againBtn').onclick=()=>location.reload()}
+
+// ---------------------- 輸入 ----------------------
+function tapAction(){if(mode==='dialog')advanceDialog();else if(mode==='cutscene')skipCutStep();else if(mode==='passage')dismissPassage()}
+function bindInput(){
+ addEventListener('keydown',e=>{keys[e.code]=true;if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Equal','Minus'].includes(e.code))e.preventDefault();if(e.repeat)return;
+  if(choosing&&/^Digit[1-4]$/.test(e.code)){const b=$('dlgOpts').children[+e.code.slice(5)-1];if(b)b.click();return}
+  if(mode==='dialog'&&['Enter','Space','KeyE'].includes(e.code))advanceDialog();
+  else if(mode==='play'&&['KeyE','Space','Enter'].includes(e.code))interact();
+  else if(mode==='cutscene'&&['Enter','Space'].includes(e.code))skipCutStep();
+  else if(mode==='passage'&&['Enter','Space','KeyE'].includes(e.code))dismissPassage()});
+ addEventListener('keyup',e=>{keys[e.code]=false});
+ const cv=$('c');const pts=new Map();let drag=null,pinch=null;
+ cv.addEventListener('contextmenu',e=>e.preventDefault());
+ cv.addEventListener('pointerdown',e=>{pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(pts.size===1)drag={id:e.pointerId,x:e.clientX,y:e.clientY,moved:false};
+  else if(pts.size===2){const [a,b]=[...pts.values()];pinch={d0:Math.hypot(a.x-b.x,a.y-b.y),dist0:camDist};if(drag)drag.moved=true}});
+ cv.addEventListener('pointermove',e=>{const p=pts.get(e.pointerId);if(!p)return;p.x=e.clientX;p.y=e.clientY;
+  if(pinch&&pts.size>=2){if(camLocked){lockNotice();return}const [a,b]=[...pts.values()];const d=Math.hypot(a.x-b.x,a.y-b.y);if(d>10)camDist=clamp(pinch.dist0*pinch.d0/d,CAM.minD,CAM.maxD);return}
+  if(drag&&e.pointerId===drag.id){const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.abs(dx)+Math.abs(dy)>4)drag.moved=true;
+   if(camLocked){if(drag.moved)lockNotice()}
+   else if(mode==='play'||mode==='passage'||mode==='dialog'){camYaw-=dx*(isTouch?0.008:0.006);camPitch=clamp(camPitch+dy*(isTouch?0.006:0.005),CAM.minP,CAM.maxP)}
+   drag.x=e.clientX;drag.y=e.clientY}});
+ const up=e=>{pts.delete(e.pointerId);if(pts.size<2)pinch=null;if(drag&&e.pointerId===drag.id){if(!drag.moved)tapAction();drag=null}};
+ cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);cv.addEventListener('pointerleave',e=>{if(pts.has(e.pointerId))up(e)});
+ cv.addEventListener('wheel',e=>{e.preventDefault();if(camLocked){lockNotice();return}camDist=clamp(camDist+e.deltaY*0.02,CAM.minD,CAM.maxD)},{passive:false});
+ [['zIn',-1],['zOut',1]].forEach(([id,d])=>{const b=$(id);b.addEventListener('pointerdown',e=>{e.preventDefault();zoomDir=d;try{b.setPointerCapture(e.pointerId)}catch(_){}});['pointerup','pointercancel','lostpointercapture'].forEach(ev=>b.addEventListener(ev,()=>zoomDir=0))});
+ $('zReset').addEventListener('click',()=>{if(camLocked){lockNotice();return}camPitch=CAM.defP;camDist=camDistDefault;toast('鏡頭已重置',1200)});
+ $('dialog').addEventListener('click',advanceDialog);$('subtitle').addEventListener('click',skipCutStep);
+ $('passageBox').addEventListener('click',dismissPassage);
+ $('prompt').addEventListener('click',interact);
+ $('btnText').onclick=()=>{const el=$('textPanel');updateTextPanel();el.style.display=el.style.display==='block'?'none':'block'};
+ $('btnHelp').onclick=()=>toast(isTouch?'左下搖桿移動｜單指拖曳 360° 轉鏡頭｜雙指開合或 🔍 鍵縮放｜右下 E 鍵對話・上岸・登船・做標記｜對話中點選項可選擇話題｜第二幕山洞鏡頭固定｜小地圖：🟡字詞卷 ⚪未對話村民 🔶標記處 🟢目標':'W/A/S/D 移動｜滑鼠拖曳或方向鍵轉鏡頭｜滾輪或 +/− 縮放｜E 對話・上岸・登船・做標記｜1/2/3 選擇對話選項｜第二幕山洞鏡頭固定｜小地圖：🟡字詞卷 ⚪未對話村民 🔶標記處 🟢目標',6000);
+ $('btnMusic').onclick=()=>{getCtx();musicStart();musicToggle()};
+ $('btnFull').onclick=()=>{const d=document.documentElement;const fs=document.fullscreenElement||document.webkitFullscreenElement;try{if(fs){(document.exitFullscreen||document.webkitExitFullscreen).call(document)}else{(d.requestFullscreen||d.webkitRequestFullscreen).call(d)}}catch(e){toast('此瀏覽器不支援全螢幕，可用 Safari「加入主畫面」後開啟')}};
+ $('mmWrap').addEventListener('click',()=>$('mmWrap').classList.toggle('big'));
+ document.addEventListener('gesturestart',e=>e.preventDefault());document.addEventListener('gesturechange',e=>e.preventDefault());
+ if(isTouch){document.body.classList.add('touch');$('touch').style.display='block';bindJoystick();
+  const act=$('tAct');act.addEventListener('pointerdown',e=>{e.preventDefault();if(mode==='dialog')advanceDialog();else if(mode==='play')interact();else if(mode==='cutscene')skipCutStep();else if(mode==='passage')dismissPassage()})}
+}
+function bindJoystick(){const base=$('joy'),knob=$('joyKnob');const RAD=55;
+ const move=e=>{let dx=e.clientX-joy.cx,dy=e.clientY-joy.cy;const d=Math.hypot(dx,dy);if(d>RAD){dx*=RAD/d;dy*=RAD/d}knob.style.transform='translate('+dx+'px,'+dy+'px)';joy.x=dx/RAD;joy.y=dy/RAD};
+ base.addEventListener('pointerdown',e=>{if(joy.id!==null)return;e.preventDefault();joy.id=e.pointerId;try{base.setPointerCapture(e.pointerId)}catch(_){}const r=base.getBoundingClientRect();joy.cx=r.left+r.width/2;joy.cy=r.top+r.height/2;move(e)});
+ base.addEventListener('pointermove',e=>{if(e.pointerId===joy.id)move(e)});
+ const end=e=>{if(e.pointerId!==joy.id)return;joy.id=null;joy.x=joy.y=0;knob.style.transform='translate(0,0)'};
+ base.addEventListener('pointerup',end);base.addEventListener('pointercancel',end);base.addEventListener('lostpointercapture',end);
+}
+init();
+</script>
+</body>
+</html>
